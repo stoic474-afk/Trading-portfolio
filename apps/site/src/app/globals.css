@@ -86,6 +86,10 @@ select {
   vertical-align: 0.18em;
 }
 
+.metric-number::part(decimal) {
+  margin-inline: -0.1em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

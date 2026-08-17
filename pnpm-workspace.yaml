@@ -5,6 +5,7 @@ packages:
 catalog:
   "@ark-ui/react": ^5.37.2
   "@biomejs/biome": 2.4.14
+  "@number-flow/react": ^0.6.2
   "@tanstack/react-query": latest
   "@trpc/client": ^11.17.0
   "@trpc/server": ^11.17.0

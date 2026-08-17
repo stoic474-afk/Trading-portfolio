@@ -12,6 +12,9 @@ catalogs:
     '@biomejs/biome':
       specifier: 2.4.14
       version: 2.4.14
+    '@number-flow/react':
+      specifier: ^0.6.2
+      version: 0.6.2
     '@tailwindcss/postcss':
       specifier: ^4
       version: 4.3.3
@@ -59,6 +62,9 @@ importers:
       '@ark-ui/react':
         specifier: 'catalog:'
         version: 5.38.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@number-flow/react':
+        specifier: 'catalog:'
+        version: 0.6.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       next:
         specifier: 'catalog:'
         version: 16.3.1(@types/node@26.1.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -388,6 +394,12 @@ packages:
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
+
+  '@number-flow/react@0.6.2':
+    resolution: {integrity: sha512-WjZuV4aA+vhRCgCF+adGLgFVVAJ8vdvq6EchRT2FiBIgElTXtDOA3YgkcMr9UHpvpS9v4H70AB5wZv0D9jc3QA==}
+    peerDependencies:
+      react: ^18 || ^19
+      react-dom: ^18 || ^19
 
   '@swc/helpers@0.5.23':
     resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
@@ -747,6 +759,9 @@ packages:
     resolution: {integrity: sha512-L1l8TNvomm6UVW5B253AGxQagSQr+vGwhMlrrfRS2qmhx46AMpMVJKQYLvWYbysTMY8VoicOvzHzoHMbyzB+4A==}
     engines: {node: '>=10.13.0'}
 
+  esm-env@1.2.2:
+    resolution: {integrity: sha512-Epxrv+Nr/CaL4ZcFGPJIYLWFom+YeV1DqMLHJoEd9SYRxNbaFruBwfEX/kkHUJf55j2+TUbmDcmuilbP1TmXHA==}
+
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
@@ -852,6 +867,9 @@ packages:
         optional: true
       sass:
         optional: true
+
+  number-flow@0.6.2:
+    resolution: {integrity: sha512-MCnImG4Q5vPwhSXnov56nOuyyKn6LC+Qd7II1UiKc+ACRtug5iAtn0+CwXNxM38AC5lSowEY+oYEtZX2qMnUyw==}
 
   perfect-freehand@1.2.3:
     resolution: {integrity: sha512-bHZSfqDHGNlPpgH2yxXgPHlQSPpEbo+qg7li0M78J9vNAi2yjwLeA4x79BEQhX44lEWpCLSFCeRZwpw0niiXPA==}
@@ -1223,6 +1241,13 @@ snapshots:
 
   '@next/swc-win32-x64-msvc@16.3.1':
     optional: true
+
+  '@number-flow/react@0.6.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      esm-env: 1.2.2
+      number-flow: 0.6.2
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
 
   '@swc/helpers@0.5.23':
     dependencies:
@@ -1889,6 +1914,8 @@ snapshots:
       graceful-fs: 4.2.11
       tapable: 2.3.3
 
+  esm-env@1.2.2: {}
+
   graceful-fs@4.2.11: {}
 
   jiti@2.7.0: {}
@@ -1972,6 +1999,10 @@ snapshots:
       - '@babel/core'
       - '@types/node'
       - babel-plugin-macros
+
+  number-flow@0.6.2:
+    dependencies:
+      esm-env: 1.2.2
 
   perfect-freehand@1.2.3: {}
 

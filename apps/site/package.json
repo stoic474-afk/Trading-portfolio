@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ark-ui/react": "catalog:",
+    "@number-flow/react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"

@@ -1,4 +1,5 @@
 import { siteConfig } from "@/config/site";
+import { footerContent } from "@/content/footer";
 import { Container } from "../ui/container";
 
 export function Footer() {
@@ -11,7 +12,7 @@ export function Footer() {
           <p className="text-[var(--color-muted)] text-xs">
             © {currentYear} {siteConfig.name}
           </p>
-          <p className="max-w-4xl text-[var(--color-muted)] text-xs leading-5">{siteConfig.disclaimer}</p>
+          <p className="max-w-4xl text-[var(--color-muted)] text-xs leading-5">{footerContent.disclaimer}</p>
         </div>
       </Container>
     </footer>

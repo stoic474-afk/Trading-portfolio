@@ -42,8 +42,6 @@ export const tradingData = {
     maxDrawdownUsd: 545,
   },
   liveSessions: {
-    period: "August 2026",
     records: liveSessionRecords,
-    sourceNote: "Paper account · live market data · real bid–ask spreads",
   },
 } as const;

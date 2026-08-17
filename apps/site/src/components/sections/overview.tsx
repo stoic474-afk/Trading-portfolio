@@ -1,23 +1,19 @@
 import { Container } from "../ui/container";
 import { SectionHeading } from "../ui/section-heading";
+import { type TerminalEntry, TerminalPanel } from "../ui/terminal-panel";
 
 export type OverviewProps = {
+  readonly entries: readonly TerminalEntry[];
   readonly heading: string;
-  readonly paragraphs: readonly string[];
+  readonly terminalPrompt: string;
 };
 
-export function Overview({ heading, paragraphs }: OverviewProps) {
+export function Overview({ entries, heading, terminalPrompt }: OverviewProps) {
   return (
     <section className="pb-[3.25rem]" aria-labelledby="overview-heading">
       <Container>
         <SectionHeading id="overview-heading">{heading}</SectionHeading>
-        <div className="max-w-3xl space-y-3.5">
-          {paragraphs.map((paragraph) => (
-            <p className="text-[0.875rem] text-[var(--color-muted)] leading-7" key={paragraph}>
-              {paragraph}
-            </p>
-          ))}
-        </div>
+        <TerminalPanel entries={entries} prompt={terminalPrompt} />
       </Container>
     </section>
   );

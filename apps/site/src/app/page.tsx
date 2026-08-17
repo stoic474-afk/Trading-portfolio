@@ -1,27 +1,42 @@
 import { Shell } from "@/components/layout/shell";
-import { Section } from "@/components/ui/section";
-import { Stack } from "@/components/ui/stack";
-import { Surface } from "@/components/ui/surface";
+import { Hero, type HeroProps } from "@/components/sections/hero";
+import { type PerformanceMetric, PerformanceMetrics } from "@/components/sections/performance-metrics";
+import { siteConfig } from "@/config/site";
+
+const heroContent = {
+  title: siteConfig.name,
+  eyebrow: siteConfig.eyebrow,
+  description: siteConfig.description,
+} satisfies HeroProps;
+
+const performanceMetrics = [
+  {
+    label: "Backtest Net P&L",
+    prefix: "+$",
+    value: "18,986",
+    description: "Oct 2025 – Mar 2026 · 74 trades",
+    tone: "positive",
+  },
+  {
+    label: "Profit Factor",
+    value: "7.38",
+    suffix: "×",
+    description: "Avg win $1,286 · Avg loss $271",
+    tone: "accent",
+  },
+  {
+    label: "Max Drawdown",
+    prefix: "$",
+    value: "545",
+    description: "Across entire 6-month backtest period",
+  },
+] satisfies readonly PerformanceMetric[];
 
 export default function Home() {
   return (
     <Shell>
-      <Section
-        eyebrow="Portfolio foundation"
-        title="Nemesis Protocol"
-        description="The shared application shell and design system are ready. Portfolio content migration is the next step."
-        className="flex min-h-[calc(100svh-12rem)] items-center"
-      >
-        <Surface className="max-w-2xl">
-          <Stack gap="sm">
-            <p className="font-mono text-[var(--color-accent)] text-xs uppercase tracking-[0.18em]">System status</p>
-            <p className="text-[var(--color-muted)] text-sm leading-6">
-              Next.js, Tailwind CSS, Ark UI, shared tokens, and reusable layout primitives are connected through the
-              root workspace.
-            </p>
-          </Stack>
-        </Surface>
-      </Section>
+      <Hero {...heroContent} />
+      <PerformanceMetrics metrics={performanceMetrics} />
     </Shell>
   );
 }

@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import { Geist_Mono } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+});
 
 export const metadata: Metadata = {
   applicationName: siteConfig.name,
@@ -31,7 +37,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
+    <html className={geistMono.variable} lang="en">
       <body>{children}</body>
     </html>
   );

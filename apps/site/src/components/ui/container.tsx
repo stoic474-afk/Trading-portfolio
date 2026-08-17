@@ -1,7 +1,7 @@
 import { ark, type HTMLArkProps } from "@ark-ui/react/factory";
 import { classNames } from "@/lib/class-names";
 
-type ContainerSize = "content" | "wide";
+type ContainerSize = "content" | "narrow" | "wide";
 
 export type ContainerProps = HTMLArkProps<"div"> & {
   size?: ContainerSize;
@@ -9,6 +9,7 @@ export type ContainerProps = HTMLArkProps<"div"> & {
 
 const containerSizeClassName: Record<ContainerSize, string> = {
   content: "max-w-[var(--page-width)]",
+  narrow: "max-w-[53.75rem]",
   wide: "max-w-[90rem]",
 };
 

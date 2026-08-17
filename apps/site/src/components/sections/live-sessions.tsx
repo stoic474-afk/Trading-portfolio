@@ -52,7 +52,7 @@ export function LiveSessions({ period, records, sourceNote }: LiveSessionsProps)
 
   return (
     <section aria-labelledby="live-sessions-heading" className="pb-[3.25rem]">
-      <Container size="narrow">
+      <Container>
         <SectionHeading id="live-sessions-heading">Live Sessions — {period}</SectionHeading>
         <Table wrapperClassName="rounded-[var(--radius-sm)] border bg-[var(--color-surface)] px-5 sm:px-7">
           <TableCaption className="sr-only">Trading results for {period}</TableCaption>

@@ -1,5 +1,6 @@
 import { formatUsd } from "@trading-portfolio/std-core/format/usd";
 import { Shell } from "@/components/layout/shell";
+import { EngineeringFeatures } from "@/components/sections/engineering-features";
 import { Hero, type HeroProps } from "@/components/sections/hero";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { LiveSessions } from "@/components/sections/live-sessions";
@@ -7,6 +8,7 @@ import { Overview, type OverviewProps } from "@/components/sections/overview";
 import { type PerformanceMetric, PerformanceMetrics } from "@/components/sections/performance-metrics";
 import { siteConfig } from "@/config/site";
 import { tradingData } from "@/config/trading-data";
+import { engineeringFeatures } from "@/content/engineering-features";
 import { workflowSteps } from "@/content/workflow";
 
 const { backtest, instrument, liveSessions, session, strategy } = tradingData;
@@ -61,6 +63,7 @@ export default function Home() {
       <Overview {...overviewContent} />
       <LiveSessions {...liveSessions} />
       <HowItWorks steps={workflowSteps} />
+      <EngineeringFeatures features={engineeringFeatures} />
     </Shell>
   );
 }

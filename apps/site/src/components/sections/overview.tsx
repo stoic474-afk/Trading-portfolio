@@ -9,7 +9,7 @@ export type OverviewProps = {
 export function Overview({ heading, paragraphs }: OverviewProps) {
   return (
     <section className="pb-[3.25rem]" aria-labelledby="overview-heading">
-      <Container size="narrow">
+      <Container>
         <SectionHeading id="overview-heading">{heading}</SectionHeading>
         <div className="max-w-3xl space-y-3.5">
           {paragraphs.map((paragraph) => (

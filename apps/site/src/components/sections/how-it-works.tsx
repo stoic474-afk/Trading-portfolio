@@ -1,10 +1,9 @@
 import { Container } from "../ui/container";
-import type { ProcessStep } from "../ui/process-steps";
-import { ProcessSteps } from "../ui/process-steps";
 import { SectionHeading } from "../ui/section-heading";
+import { StepFlow, type StepFlowStep } from "../ui/step-flow";
 
 export type HowItWorksProps = {
-  readonly steps: readonly ProcessStep[];
+  readonly steps: readonly StepFlowStep[];
 };
 
 export function HowItWorks({ steps }: HowItWorksProps) {
@@ -12,7 +11,7 @@ export function HowItWorks({ steps }: HowItWorksProps) {
     <section aria-labelledby="how-it-works-heading" className="pb-[3.25rem]">
       <Container>
         <SectionHeading id="how-it-works-heading">How It Works</SectionHeading>
-        <ProcessSteps steps={steps} />
+        <StepFlow steps={steps} />
       </Container>
     </section>
   );

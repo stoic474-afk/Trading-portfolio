@@ -1,0 +1,9 @@
+{
+  "extends": "@trading-portfolio/config-typescript/base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

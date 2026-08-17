@@ -65,6 +65,9 @@ importers:
       '@number-flow/react':
         specifier: 'catalog:'
         version: 0.6.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@trading-portfolio/std-core':
+        specifier: workspace:*
+        version: link:../../packages/std-core
       next:
         specifier: 'catalog:'
         version: 16.3.1(@types/node@26.1.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -98,6 +101,12 @@ importers:
         version: 5.9.3
 
   packages/config-typescript: {}
+
+  packages/std-core:
+    devDependencies:
+      '@trading-portfolio/config-typescript':
+        specifier: workspace:*
+        version: link:../config-typescript
 
 packages:
 

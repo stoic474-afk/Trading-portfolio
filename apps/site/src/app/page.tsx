@@ -1,12 +1,13 @@
+import { formatUsd } from "@trading-portfolio/std-core/format/usd";
 import { Shell } from "@/components/layout/shell";
 import { Hero, type HeroProps } from "@/components/sections/hero";
+import { LiveSessions } from "@/components/sections/live-sessions";
 import { Overview, type OverviewProps } from "@/components/sections/overview";
 import { type PerformanceMetric, PerformanceMetrics } from "@/components/sections/performance-metrics";
 import { siteConfig } from "@/config/site";
 import { tradingData } from "@/config/trading-data";
-import { formatUsd } from "@/lib/format-usd";
 
-const { backtest, instrument, session, strategy } = tradingData;
+const { backtest, instrument, liveSessions, session, strategy } = tradingData;
 
 const heroContent = {
   title: siteConfig.name,
@@ -56,6 +57,7 @@ export default function Home() {
       <Hero {...heroContent} />
       <PerformanceMetrics metrics={performanceMetrics} />
       <Overview {...overviewContent} />
+      <LiveSessions {...liveSessions} />
     </Shell>
   );
 }

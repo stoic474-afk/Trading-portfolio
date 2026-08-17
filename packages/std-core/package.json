@@ -1,0 +1,14 @@
+{
+  "name": "@trading-portfolio/std-core",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./*": "./*.ts"
+  },
+  "devDependencies": {
+    "@trading-portfolio/config-typescript": "workspace:*"
+  }
+}

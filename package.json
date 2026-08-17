@@ -1,0 +1,19 @@
+{
+  "name": "trading-portfolio-workspace",
+  "private": true,
+  "packageManager": "pnpm@10.24.0",
+  "scripts": {
+    "site": "pnpm --filter @trading-portfolio/site",
+    "dev": "pnpm --filter @trading-portfolio/site dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

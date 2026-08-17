@@ -1,0 +1,9 @@
+{
+  "name": "@trading-portfolio/config-typescript",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./nextjs.json": "./nextjs.json"
+  }
+}

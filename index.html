@@ -1,0 +1,844 @@
+<title>Matt's Automated Trading Bot</title>
+<meta name="description" content="Algorithmic trading bot running ICT AMD setups on MNQ futures — live results and engineering overview.">
+<meta property="og:title" content="Matt's Automated Trading Bot">
+<meta property="og:description" content="Algorithmic trading bot running ICT AMD setups on MNQ futures — live results and engineering overview.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Matt's Automated Trading Bot">
+<meta name="twitter:description" content="Algorithmic trading bot running ICT AMD setups on MNQ futures — live results and engineering overview.">
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg:        #F4F6F9;
+  --surface:   #FFFFFF;
+  --ink:       #0D1117;
+  --muted:     #64748B;
+  --accent:    #2563EB;
+  --accent-bg: #EFF6FF;
+  --pos:       #16A34A;
+  --pos-bg:    #F0FDF4;
+  --border:    #CBD5E1;
+  --hairline:  #E2E8F0;
+  --code-bg:   #0D1117;
+  --code-fg:   #C9D1D9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #010409;
+    --surface:   #0D1117;
+    --ink:       #E6EDF3;
+    --muted:     #7D8590;
+    --accent:    #58A6FF;
+    --accent-bg: #0D1926;
+    --pos:       #3FB950;
+    --pos-bg:    #0A190E;
+    --border:    #30363D;
+    --hairline:  #21262D;
+    --code-bg:   #010409;
+    --code-fg:   #C9D1D9;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #010409;
+  --surface:   #0D1117;
+  --ink:       #E6EDF3;
+  --muted:     #7D8590;
+  --accent:    #58A6FF;
+  --accent-bg: #0D1926;
+  --pos:       #3FB950;
+  --pos-bg:    #0A190E;
+  --border:    #30363D;
+  --hairline:  #21262D;
+  --code-bg:   #010409;
+  --code-fg:   #C9D1D9;
+}
+:root[data-theme="light"] {
+  --bg:        #F4F6F9;
+  --surface:   #FFFFFF;
+  --ink:       #0D1117;
+  --muted:     #64748B;
+  --accent:    #2563EB;
+  --accent-bg: #EFF6FF;
+  --pos:       #16A34A;
+  --pos-bg:    #F0FDF4;
+  --border:    #CBD5E1;
+  --hairline:  #E2E8F0;
+  --code-bg:   #0D1117;
+  --code-fg:   #C9D1D9;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── HERO — always dark ── */
+.hero {
+  background: #0D1117;
+  color: #E6EDF3;
+  padding: 64px 32px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle grid overlay */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.hero-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #58A6FF;
+  margin-bottom: 16px;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+}
+
+.hero-title {
+  font-size: clamp(36px, 6vw, 60px);
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1.05;
+  color: #F0F6FC;
+  margin-bottom: 16px;
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: #8B949E;
+  max-width: 560px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-block;
+  background: rgba(56,139,253,.15);
+  color: #58A6FF;
+  border: 1px solid rgba(56,139,253,.3);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  padding: 4px 10px;
+}
+
+/* ── CONTENT WRAPPER ── */
+.content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 32px 72px;
+}
+
+/* ── PERF RIBBON ── */
+.perf-ribbon {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-top: none;
+  margin-bottom: 52px;
+}
+
+.perf-tile {
+  background: var(--surface);
+  padding: 24px 28px 20px;
+}
+
+.perf-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.perf-num {
+  font-size: 32px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: -1px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.perf-num.green { color: var(--pos); }
+.perf-num.blue  { color: var(--accent); }
+
+.perf-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* ── SECTION ── */
+section { margin-bottom: 52px; }
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hairline);
+  margin-bottom: 22px;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+}
+
+/* ── TWO COL ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 52px;
+}
+
+.overview p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+.overview p:last-child { margin-bottom: 0; }
+.overview strong { color: var(--ink); font-weight: 600; }
+
+/* ── LIVE TABLE ── */
+.live-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.live-table th {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+  text-align: left;
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.live-table th:last-child,
+.live-table td:last-child { text-align: right; }
+
+.live-table td {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 12px;
+}
+
+.live-table tbody tr:last-child td { border-bottom: none; }
+
+.live-table .total-row td {
+  border-top: 1px solid var(--border);
+  border-bottom: none;
+  padding-top: 11px;
+  font-weight: 700;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+}
+.pill-w  { background: var(--pos-bg);    color: var(--pos); }
+.pill-l  { background: #FEF2F2;          color: #DC2626; }
+.pill-be { background: var(--accent-bg); color: var(--accent); }
+.pill-n  { background: var(--hairline);  color: var(--muted); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pill-l { background: #200808; color: #F87171; }
+}
+:root[data-theme="dark"] .pill-l { background: #200808; color: #F87171; }
+
+.pos-t { color: var(--pos); }
+.neg-t { color: #DC2626; }
+.dim   { color: var(--muted); }
+
+/* ── FLOW DIAGRAM ── */
+.flow-steps {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.flow-step {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.flow-box {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 14px 12px;
+  text-align: center;
+  min-width: 0;
+}
+
+.flow-box .step-num {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  margin-bottom: 6px;
+}
+
+.flow-box .step-name {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.flow-box .step-detail {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.flow-arrow {
+  color: var(--border);
+  font-size: 18px;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+/* ── CODE BLOCK ── */
+.code-wrap {
+  background: var(--code-bg);
+  border: 1px solid #30363D;
+  overflow: hidden;
+}
+
+.code-header {
+  background: #161B22;
+  border-bottom: 1px solid #30363D;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.code-dots { display: flex; gap: 6px; }
+.code-dot  {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #30363D;
+}
+
+.code-filename {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 12px;
+  color: #8B949E;
+}
+
+.code-block {
+  margin: 0;
+  padding: 20px 20px 20px 0;
+  overflow-x: auto;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--code-fg);
+  counter-reset: line;
+}
+
+.code-block .ln {
+  display: inline-block;
+  width: 36px;
+  padding-right: 16px;
+  text-align: right;
+  color: #484F58;
+  user-select: none;
+  counter-increment: line;
+}
+
+/* Syntax colours — VS Code Dark+ inspired */
+.kw  { color: #FF7B72; }   /* keywords */
+.fn  { color: #D2A8FF; }   /* function names */
+.bi  { color: #79C0FF; }   /* builtins / types */
+.st  { color: #A5D6FF; }   /* strings */
+.cm  { color: #8B949E; font-style: italic; }  /* comments */
+.nm  { color: #79C0FF; }   /* numbers */
+.op  { color: #FF7B72; }   /* operators */
+.var { color: #C9D1D9; }   /* default / variables */
+.dec { color: #FFA657; }   /* decorators */
+
+/* ── FEATURES GRID ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.feature-card {
+  background: var(--surface);
+  padding: 20px 22px;
+}
+
+.feature-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-family: ui-monospace, monospace;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.feature-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.feature-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── STACK ROW ── */
+.stack-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.stack-item {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+}
+
+/* ── FOOTER ── */
+.doc-footer {
+  padding-top: 20px;
+  border-top: 1px solid var(--hairline);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .hero { padding: 44px 20px 40px; }
+  .content { padding: 0 18px 52px; }
+  .perf-ribbon { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; gap: 28px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .flow-steps { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); align-self: center; padding: 2px 0; }
+  .perf-num { font-size: 26px; }
+  .hero-title { font-size: 36px; }
+}
+</style>
+
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">// project portfolio</div>
+    <h1 class="hero-title">Nemesis Protocol</h1>
+    <p class="hero-sub">
+      Headless algorithmic trading bot executing ICT AMD setups on Micro
+      E&#8209;mini Nasdaq futures via the Interactive Brokers API.
+      Automated from signal detection through order management to exit.
+    </p>
+    <div class="badge-row">
+      <span class="badge">Python 3.11</span>
+      <span class="badge">ib_insync</span>
+      <span class="badge">pandas</span>
+      <span class="badge">asyncio</span>
+      <span class="badge">IBKR API</span>
+      <span class="badge">Discord Webhooks</span>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+
+  <!-- ── PERF RIBBON ── -->
+  <div class="perf-ribbon" role="region" aria-label="Performance metrics">
+    <div class="perf-tile">
+      <div class="perf-eyebrow">Backtest Net P&amp;L</div>
+      <div class="perf-num green" data-counter data-prefix="+" data-symbol="$" data-target="18986">+$0</div>
+      <div class="perf-sub">Oct 2025 &ndash; Mar 2026 &middot; 74 trades</div>
+    </div>
+    <div class="perf-tile">
+      <div class="perf-eyebrow">Profit Factor</div>
+      <div class="perf-num blue" data-counter data-suffix="&times;" data-decimals="2" data-target="738">0&times;</div>
+      <div class="perf-sub">Avg win $1,286 &middot; Avg loss $271</div>
+    </div>
+    <div class="perf-tile">
+      <div class="perf-eyebrow">Max Drawdown</div>
+      <div class="perf-num" data-counter data-prefix="$" data-target="545">$0</div>
+      <div class="perf-sub">Across entire 6-month backtest period</div>
+    </div>
+  </div>
+
+  <!-- ── OVERVIEW + LIVE ── -->
+  <div class="two-col">
+    <div>
+      <div class="section-label">Overview</div>
+      <div class="overview">
+        <p>
+          Nemesis Protocol monitors MNQ futures during the <strong>9:30&ndash;11:00&nbsp;AM&nbsp;ET</strong>
+          session window. It identifies the prior session&rsquo;s high and low as reference
+          liquidity pools, then waits for a manipulation sweep of one level before the
+          distribution phase drives price in the opposite direction.
+        </p>
+        <p>
+          Entries require multi-timeframe confluence: a <strong>15-minute or 1-hour
+          structural bias</strong>, a market structure break, and an order block or fair
+          value gap as the trigger zone. Every entry immediately places an OCA bracket
+          (stop + limit target) anchored to the <em>actual fill price</em> — not the
+          intended entry — to correctly account for slippage.
+        </p>
+        <p>
+          When conditions are ambiguous the bot exits at break-even: <strong>57% of entries
+          cost nothing</strong>. This selectivity is the primary driver of the
+          7.38&times; profit factor — losses are bounded and rare, winners run to
+          structural targets.
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Live Sessions &mdash; August 2026</div>
+<table class="live-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Result</th>
+            <th>P&amp;L</th>
+          </tr>
+        </thead>
+        <tbody id="trades-body">
+          <tr>
+            <td>Aug 3</td>
+            <td><span class="pill pill-l">Loss</span></td>
+            <td class="neg-t">&minus;$236</td>
+          </tr>
+          <tr>
+            <td class="dim">Aug 4&ndash;5</td>
+            <td><span class="pill pill-n">No setup</span></td>
+            <td class="dim">&mdash;</td>
+          </tr>
+          <tr>
+            <td>Aug 6</td>
+            <td><span class="pill pill-w">Win</span></td>
+            <td class="pos-t">+$423</td>
+          </tr>
+          <tr>
+            <td>Aug 7</td>
+            <td><span class="pill pill-w">Win</span> <span class="pill pill-l">Loss</span></td>
+            <td class="pos-t">+$140</td>
+          </tr>
+          <tr>
+            <td class="dim">Aug 10</td>
+            <td><span class="pill pill-n">No setup</span></td>
+            <td class="dim">&mdash;</td>
+          </tr>
+          <tr>
+            <td>Aug 11</td>
+            <td><span class="pill pill-be">BE</span></td>
+            <td class="dim">$0</td>
+          </tr>
+          <tr>
+            <td>Aug 12</td>
+            <td><span class="pill pill-w">Win</span></td>
+            <td class="pos-t">+$232</td>
+          </tr>
+          <tr>
+            <td class="dim">Aug 13&ndash;15</td>
+            <td><span class="pill pill-n">No setup</span></td>
+            <td class="dim">&mdash;</td>
+          </tr>
+          <tr id="aug14-row">
+            <td>Aug 14</td>
+            <td><span class="pill pill-w">Win</span></td>
+            <td class="pos-t">+$723.50</td>
+          </tr>
+          <tr class="total-row" id="total-row">
+            <td>Aug total</td>
+            <td class="dim" id="total-summary" style="font-size:12px;font-family:-apple-system,'Segoe UI',sans-serif">7 trades &middot; 4W 2L 1BE</td>
+            <td class="pos-t" id="total-pnl">+$1,282.50</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
+        Paper account (IBKR DUP551162) &middot; live market data &middot; real bid&ndash;ask spreads
+      </p>
+    </div>
+  </div>
+
+  <!-- ── TRADING FLOW ── -->
+  <section>
+    <div class="section-label">How It Works</div>
+    <div class="flow-steps" role="list">
+      <div class="flow-step" role="listitem">
+        <div class="flow-box">
+          <span class="step-num">01</span>
+          <span class="step-name">HTF Bias</span>
+          <span class="step-detail">15-min / 1-hr structural shift &amp; FVG</span>
+        </div>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
+      <div class="flow-step" role="listitem">
+        <div class="flow-box">
+          <span class="step-num">02</span>
+          <span class="step-name">Liquidity Sweep</span>
+          <span class="step-detail">FVG zone swept; price returns through key level</span>
+        </div>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
+      <div class="flow-step" role="listitem">
+        <div class="flow-box">
+          <span class="step-num">03</span>
+          <span class="step-name">Entry Signal</span>
+          <span class="step-detail">MSB + OB / FVG confluence</span>
+        </div>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
+      <div class="flow-step" role="listitem">
+        <div class="flow-box">
+          <span class="step-num">04</span>
+          <span class="step-name">OCA Bracket</span>
+          <span class="step-detail">Stop + target anchored to actual fill</span>
+        </div>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
+      <div class="flow-step" role="listitem">
+        <div class="flow-box">
+          <span class="step-num">05</span>
+          <span class="step-name">BE Management</span>
+          <span class="step-detail">SMT divergence / LH-HL / FVG obstacle</span>
+        </div>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
+      <div class="flow-step" role="listitem">
+        <div class="flow-box">
+          <span class="step-num">06</span>
+          <span class="step-name">Exit</span>
+          <span class="step-detail">Target / BE stop / 4&nbsp;pm force-flat</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CODE ── -->
+  <section>
+    <div class="section-label">Code Highlight &mdash; Fill Callback</div>
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-dots">
+          <div class="code-dot"></div>
+          <div class="code-dot"></div>
+          <div class="code-dot"></div>
+        </div>
+        <span class="code-filename">main_trading_bot.py</span>
+      </div>
+      <pre class="code-block" role="region" aria-label="Python code snippet" tabindex="0"><span class="ln"></span><span class="cm"># Fires on every partial + complete fill of the entry market order.</span>
+<span class="ln"></span><span class="cm"># Bracket is placed AFTER the fill so stop/target are anchored to</span>
+<span class="ln"></span><span class="cm"># the actual execution price — not the intended entry — accounting</span>
+<span class="ln"></span><span class="cm"># for slippage on each individual leg.</span>
+<span class="ln"></span>
+<span class="ln"></span><span class="dec">@ib.fillEvent</span>
+<span class="ln"></span><span class="kw">def</span> <span class="fn">on_fill</span>(trade: <span class="bi">Trade</span>, fill: <span class="bi">Fill</span>):
+<span class="ln"></span>    <span class="kw">if</span> trade.orderStatus.filled <span class="op">&lt;</span> trade.order.totalQuantity:
+<span class="ln"></span>        <span class="kw">return</span>  <span class="cm"># wait for the complete fill before placing bracket</span>
+<span class="ln"></span>
+<span class="ln"></span>    actual_fill <span class="op">=</span> trade.orderStatus.avgFillPrice
+<span class="ln"></span>    slippage    <span class="op">=</span> actual_fill <span class="op">-</span> state.entry_price
+<span class="ln"></span>
+<span class="ln"></span>    <span class="kw">if</span> state.active_dir <span class="op">==</span> <span class="st">"long"</span>:
+<span class="ln"></span>        stop   <span class="op">=</span> <span class="bi">round</span>(actual_fill <span class="op">-</span> state.risk_pts,      <span class="nm">2</span>)
+<span class="ln"></span>        target <span class="op">=</span> <span class="bi">round</span>(actual_fill <span class="op">+</span> state.target_offset, <span class="nm">2</span>)
+<span class="ln"></span>    <span class="kw">else</span>:
+<span class="ln"></span>        stop   <span class="op">=</span> <span class="bi">round</span>(actual_fill <span class="op">+</span> state.risk_pts,      <span class="nm">2</span>)
+<span class="ln"></span>        target <span class="op">=</span> <span class="bi">round</span>(actual_fill <span class="op">-</span> state.target_offset, <span class="nm">2</span>)
+<span class="ln"></span>
+<span class="ln"></span>    log.info(
+<span class="ln"></span>        <span class="st">f"[FILL] <span class="op">{</span>state.active_dir.upper()<span class="op">}</span> x<span class="op">{</span>state.contracts<span class="op">}</span> @ <span class="op">{</span>actual_fill:.2f<span class="op">}</span>"</span>
+<span class="ln"></span>        <span class="st">f"  slippage <span class="op">{</span>slippage:+.2f<span class="op">}</span> pts | stop <span class="op">{</span>stop:.2f<span class="op">}</span> | target <span class="op">{</span>target:.2f<span class="op">}</span>"</span>
+<span class="ln"></span>    )
+<span class="ln"></span>
+<span class="ln"></span>    <span class="cm"># OCA group: when one order fills, the other is automatically cancelled</span>
+<span class="ln"></span>    place_oca_bracket(ib, contract, state, stop, target)</pre>
+    </div>
+  </section>
+
+  <!-- ── FEATURES ── -->
+  <section>
+    <div class="section-label">Engineering Features</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">01</div>
+        <div class="feature-title">Async event-driven architecture</div>
+        <div class="feature-desc">Built on ib_insync&rsquo;s asyncio event loop. Fill callbacks, order status updates, and portfolio events are handled asynchronously — the main loop never blocks waiting for IBKR responses.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">02</div>
+        <div class="feature-title">OCA bracket order management</div>
+        <div class="feature-desc">Every entry places a One-Cancels-All bracket (stop + limit target). Break-even management re-builds the OCA group with explicit cancellation of both legs to prevent orphaned resting orders.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">03</div>
+        <div class="feature-title">SMT divergence detection</div>
+        <div class="feature-desc">Compares real-time MES and MNQ 1-minute bars to detect Smart Money Technique divergences — when MES breaks a session extreme that MNQ hasn&rsquo;t, the stop is automatically moved to break-even.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">04</div>
+        <div class="feature-title">Dynamic position sizing</div>
+        <div class="feature-desc">Contracts are calculated per-trade to risk approximately $300 regardless of stop distance. Max 8 contracts enforced. Sizing anchors to actual structural levels, not fixed point distances.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">05</div>
+        <div class="feature-title">After-hours order handling</div>
+        <div class="feature-desc">Force-flat at 4:00&nbsp;pm ET via GTC + outsideRth market orders, designed to fill during the GLOBEX session open at 6:00&nbsp;pm when the daily halt ends. Survives the 5&ndash;6&nbsp;pm CME halt window.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">06</div>
+        <div class="feature-title">Stuck-order recovery</div>
+        <div class="feature-desc">If the bracket target stays in PendingSubmit for &gt;2 minutes — indicating a silent IBKR rejection — the bot detects the stall and automatically re-places the full OCA bracket.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STACK ── -->
+  <section>
+    <div class="section-label">Stack</div>
+    <div class="stack-row">
+      <span class="stack-item">Python 3.11</span>
+      <span class="stack-item">ib_insync 0.9.x</span>
+      <span class="stack-item">pandas</span>
+      <span class="stack-item">pytz / zoneinfo</span>
+      <span class="stack-item">asyncio</span>
+      <span class="stack-item">requests</span>
+      <span class="stack-item">Interactive Brokers TWS API</span>
+      <span class="stack-item">Discord Webhooks</span>
+      <span class="stack-item">Windows Task Scheduler</span>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="doc-footer">
+    All trading results are from a simulated paper account (IBKR DUP551162) using live market data and real bid&ndash;ask spreads; no real capital was at risk. Backtest performance (Oct 2025&ndash;Mar 2026) uses historical 1-minute MNQ data with realistic fill assumptions. Past performance does not guarantee future results.
+  </footer>
+
+</div><!-- end .content -->
+
+<script>
+(function () {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── Animated counters ─────────────────────────────────────────────────────
+  function animateCounter(el) {
+    const raw     = parseInt(el.dataset.target, 10);
+    const dec     = parseInt(el.dataset.decimals || '0', 10);
+    const divisor = Math.pow(10, dec);
+    const target  = raw / divisor;
+    const prefix  = el.dataset.prefix  || '';
+    const suffix  = el.dataset.suffix  || '';
+    const sym     = el.dataset.symbol  || '';
+    const dur     = 1200;
+    const start   = performance.now();
+
+    function fmt(v) {
+      if (dec > 0) return prefix + sym + v.toFixed(dec) + suffix;
+      return prefix + sym + Math.round(v).toLocaleString() + suffix;
+    }
+
+    function step(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      el.textContent = fmt(e * target);
+      if (t < 1) requestAnimationFrame(step);
+      else el.textContent = fmt(target);
+    }
+
+    if (reduced) {
+      el.textContent = fmt(target);
+    } else {
+      requestAnimationFrame(step);
+    }
+  }
+
+  const counters = document.querySelectorAll('[data-counter]');
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateCounter(entry.target);
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(el => io.observe(el));
+  } else {
+    counters.forEach(animateCounter);
+  }
+})();
+</script>
+

@@ -87,7 +87,7 @@ import '../styles/global.css';
     </div>
 
     <div>
-      <div class="section-label">Live Sessions &mdash; August 2026</div>
+      <div class="section-label" id="trades-heading">Live Sessions</div>
       <table class="live-table">
         <thead>
           <tr>
@@ -96,61 +96,13 @@ import '../styles/global.css';
             <th>P&amp;L</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td>Aug 3</td>
-            <td><span class="pill pill-l">Loss</span></td>
-            <td class="neg-t">&minus;$236</td>
-          </tr>
-          <tr>
-            <td class="dim">Aug 4&ndash;5</td>
-            <td><span class="pill pill-n">No setup</span></td>
-            <td class="dim">&mdash;</td>
-          </tr>
-          <tr>
-            <td>Aug 6</td>
-            <td><span class="pill pill-w">Win</span></td>
-            <td class="pos-t">+$423</td>
-          </tr>
-          <tr>
-            <td>Aug 7</td>
-            <td><span class="pill pill-w">Win</span> <span class="pill pill-l">Loss</span></td>
-            <td class="pos-t">+$140</td>
-          </tr>
-          <tr>
-            <td class="dim">Aug 10</td>
-            <td><span class="pill pill-n">No setup</span></td>
-            <td class="dim">&mdash;</td>
-          </tr>
-          <tr>
-            <td>Aug 11</td>
-            <td><span class="pill pill-be">BE</span></td>
-            <td class="dim">$0</td>
-          </tr>
-          <tr>
-            <td>Aug 12</td>
-            <td><span class="pill pill-w">Win</span></td>
-            <td class="pos-t">+$232</td>
-          </tr>
-          <tr>
-            <td class="dim">Aug 13&ndash;15</td>
-            <td><span class="pill pill-n">No setup</span></td>
-            <td class="dim">&mdash;</td>
-          </tr>
-          <tr>
-            <td>Aug 14</td>
-            <td><span class="pill pill-w">Win</span></td>
-            <td class="pos-t">+$723.50</td>
-          </tr>
-          <tr class="total-row">
-            <td>Aug total</td>
-            <td class="dim" style="font-size:12px;font-family:-apple-system,'Segoe UI',sans-serif">7 trades &middot; 4W 2L 1BE</td>
-            <td class="pos-t">+$1,282.50</td>
-          </tr>
+        <tbody id="trades-body">
+          <tr><td colspan="3" class="dim" style="padding:16px 0;text-align:center;font-family:-apple-system,sans-serif">Loading...</td></tr>
         </tbody>
       </table>
       <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
         Paper account (IBKR DUP551162) &middot; live market data &middot; real bid&ndash;ask spreads
+        &middot; <span id="trades-updated" style="opacity:.7"></span>
       </p>
     </div>
   </div>
@@ -315,6 +267,7 @@ import '../styles/global.css';
 (function () {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ── Animated counters ────────────────────────────────────────────────────
   function animateCounter(el) {
     const raw     = parseInt(el.dataset.target, 10);
     const dec     = parseInt(el.dataset.decimals || '0', 10);
@@ -325,12 +278,10 @@ import '../styles/global.css';
     const sym     = el.dataset.symbol  || '';
     const dur     = 1200;
     const start   = performance.now();
-
     function fmt(v) {
       if (dec > 0) return prefix + sym + v.toFixed(dec) + suffix;
       return prefix + sym + Math.round(v).toLocaleString() + suffix;
     }
-
     function step(now) {
       const t = Math.min((now - start) / dur, 1);
       const e = 1 - Math.pow(1 - t, 3);
@@ -338,7 +289,6 @@ import '../styles/global.css';
       if (t < 1) requestAnimationFrame(step);
       else el.textContent = fmt(target);
     }
-
     if (reduced) { el.textContent = fmt(target); }
     else { requestAnimationFrame(step); }
   }
@@ -347,16 +297,107 @@ import '../styles/global.css';
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateCounter(entry.target);
-          io.unobserve(entry.target);
-        }
+        if (entry.isIntersecting) { animateCounter(entry.target); io.unobserve(entry.target); }
       });
     }, { threshold: 0.5 });
     counters.forEach(el => io.observe(el));
   } else {
     counters.forEach(animateCounter);
   }
+
+  // ── Live trades table ────────────────────────────────────────────────────
+  const TRADES_URL = 'https://raw.githubusercontent.com/stoic474-afk/Trading-portfolio/main/public/trades.json';
+
+  function pillHtml(result) {
+    const map = { win: 'pill-w', loss: 'pill-l', be: 'pill-be', mix: 'pill-w' };
+    const labels = { win: 'Win', loss: 'Loss', be: 'BE', mix: 'Win' };
+    const cls = map[result] || 'pill-n';
+    const lbl = labels[result] || result;
+    if (result === 'mix') {
+      return '<span class="pill pill-w">Win</span> <span class="pill pill-l">Loss</span>';
+    }
+    return `<span class="pill ${cls}">${lbl}</span>`;
+  }
+
+  function fmtPnl(pnl) {
+    if (pnl === 0) return '<span class="dim">$0</span>';
+    const sign = pnl > 0 ? '+' : '−';
+    const cls  = pnl > 0 ? 'pos-t' : 'neg-t';
+    return `<span class="${cls}">${sign}$${Math.abs(pnl).toLocaleString('en-US', {minimumFractionDigits: pnl % 1 !== 0 ? 2 : 0})}</span>`;
+  }
+
+  function dayNum(dateStr) {
+    const m = dateStr.match(/\d+/);
+    return m ? parseInt(m[0]) : 0;
+  }
+
+  function renderTrades(data) {
+    const tbody  = document.getElementById('trades-body');
+    const heading = document.getElementById('trades-heading');
+    const updEl  = document.getElementById('trades-updated');
+    if (!tbody) return;
+
+    heading.textContent = 'Live Sessions — ' + data.month;
+
+    // Group trades by date
+    const byDate = {};
+    for (const t of data.trades) {
+      if (!byDate[t.date]) byDate[t.date] = [];
+      byDate[t.date].push(t);
+    }
+
+    // Build sorted list of all events (trades + no-setup days)
+    const events = [];
+    for (const [date, trades] of Object.entries(byDate)) {
+      const totalPnl = trades.reduce((s, t) => s + t.pnl, 0);
+      const pills    = trades.map(t => pillHtml(t.result)).join(' ');
+      events.push({ day: dayNum(date), date, type: 'trade', pills, pnl: totalPnl });
+    }
+    for (const ns of (data.no_setup_days || [])) {
+      events.push({ day: dayNum(ns), date: ns, type: 'nosetup' });
+    }
+    events.sort((a, b) => a.day - b.day);
+
+    // Totals
+    let wins = 0, losses = 0, bes = 0, totalPnl = 0;
+    for (const t of data.trades) {
+      if (t.result === 'win' || t.result === 'mix') wins++;
+      else if (t.result === 'loss') losses++;
+      else if (t.result === 'be') bes++;
+      totalPnl += t.pnl;
+    }
+    const tradeCount = data.trades.length;
+
+    let rows = '';
+    for (const ev of events) {
+      if (ev.type === 'nosetup') {
+        rows += `<tr><td class="dim">${ev.date}</td><td><span class="pill pill-n">No setup</span></td><td class="dim">&mdash;</td></tr>`;
+      } else {
+        rows += `<tr><td>${ev.date}</td><td>${ev.pills}</td><td>${fmtPnl(Math.round(ev.pnl * 100) / 100)}</td></tr>`;
+      }
+    }
+
+    const totalSign  = totalPnl >= 0 ? '+' : '−';
+    const totalCls   = totalPnl >= 0 ? 'pos-t' : 'neg-t';
+    const totalAbs   = Math.abs(totalPnl).toLocaleString('en-US', { minimumFractionDigits: totalPnl % 1 !== 0 ? 2 : 0 });
+    const summary    = `${tradeCount} trades · ${wins}W ${losses}L ${bes}BE`;
+    rows += `<tr class="total-row"><td>${data.month.split(' ')[0]} total</td><td class="dim" style="font-size:12px;font-family:-apple-system,'Segoe UI',sans-serif">${summary}</td><td class="${totalCls}">${totalSign}$${totalAbs}</td></tr>`;
+
+    tbody.innerHTML = rows;
+
+    if (data.updated && updEl) {
+      const d = new Date(data.updated);
+      updEl.textContent = 'updated ' + d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) + ' ET';
+    }
+  }
+
+  fetch(TRADES_URL + '?v=' + Date.now())
+    .then(r => r.json())
+    .then(renderTrades)
+    .catch(() => {
+      const tbody = document.getElementById('trades-body');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="dim" style="padding:16px 0;text-align:center">Could not load trade data.</td></tr>';
+    });
 })();
 </script>
 

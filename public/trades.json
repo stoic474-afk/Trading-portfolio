@@ -1,0 +1,73 @@
+{
+  "month": "August 2026",
+  "account": "IBKR DUP551162",
+  "updated": "2026-08-18T09:51:18Z",
+  "trades": [
+    {
+      "date": "Aug 3",
+      "result": "loss",
+      "pnl": -236,
+      "note": ""
+    },
+    {
+      "date": "Aug 6",
+      "result": "win",
+      "pnl": 423,
+      "note": ""
+    },
+    {
+      "date": "Aug 7",
+      "result": "mix",
+      "pnl": 140,
+      "note": "W+L"
+    },
+    {
+      "date": "Aug 11",
+      "result": "be",
+      "pnl": 0,
+      "note": ""
+    },
+    {
+      "date": "Aug 12",
+      "result": "win",
+      "pnl": 232,
+      "note": ""
+    },
+    {
+      "date": "Aug 14",
+      "result": "win",
+      "pnl": 723.5,
+      "note": "Short 30242→30062"
+    },
+    {
+      "date": "Aug 17",
+      "result": "be",
+      "pnl": -57.0,
+      "note": ""
+    },
+    {
+      "date": "Aug 17",
+      "result": "be",
+      "pnl": -60.0,
+      "note": ""
+    },
+    {
+      "date": "Aug 18",
+      "result": "loss",
+      "pnl": -234.0,
+      "note": ""
+    },
+    {
+      "date": "Aug 18",
+      "result": "be",
+      "pnl": -4.0,
+      "note": ""
+    }
+  ],
+  "no_setup_days": [
+    "Aug 4–5",
+    "Aug 10",
+    "Aug 13",
+    "Aug 15"
+  ]
+}

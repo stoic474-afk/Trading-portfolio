@@ -62,6 +62,12 @@
       "result": "be",
       "pnl": -4.0,
       "note": ""
+    },
+    {
+      "date": "Aug 19",
+      "result": "win",
+      "pnl": 272.84,
+      "note": "4pm flat"
     }
   ],
   "no_setup_days": [

@@ -1,7 +1,7 @@
 {
   "month": "August 2026",
   "account": "IBKR DUP551162",
-  "updated": "2026-08-18T09:51:18Z",
+  "updated": "2026-08-25T15:49:00Z",
   "trades": [
     {
       "date": "Aug 3",
@@ -68,6 +68,12 @@
       "result": "win",
       "pnl": 272.84,
       "note": "4pm flat"
+    },
+    {
+      "date": "Aug 25",
+      "result": "be",
+      "pnl": 0,
+      "note": ""
     }
   ],
   "no_setup_days": [

@@ -66,22 +66,22 @@ import '../styles/global.css';
       <div class="overview">
         <p>
           Nemesis Protocol monitors MNQ futures during the <strong>9:30&ndash;11:00&nbsp;AM&nbsp;ET</strong>
-          session window. It identifies the prior session&rsquo;s high and low as reference
-          liquidity pools, then waits for a manipulation sweep of one level before the
-          distribution phase drives price in the opposite direction.
+          session window. It identifies swing structure highs and lows as draw-on-liquidity
+          targets, then waits for a manipulation sweep of one level before the
+          distribution phase drives price toward the opposing swing extreme.
         </p>
         <p>
           Entries require multi-timeframe confluence: a <strong>4-hour, 1-hour, 30-minute, and 15-minute
           structural bias</strong>, a market structure break, and a fair
           value gap as the trigger zone. Every entry immediately places an OCA bracket
-          (stop + limit target) anchored to the <em>actual fill price</em> &mdash; not the
+          (stop + target) anchored to the <em>actual fill price</em> &mdash; not the
           intended entry &mdash; to correctly account for slippage.
         </p>
         <p>
-          When conditions are ambiguous the bot exits at break-even: <strong>57% of entries
-          cost nothing</strong>. This selectivity is the primary driver of the
-          7.38&times; profit factor &mdash; losses are bounded and rare, winners run to
-          structural targets.
+          The bot skips setups where no qualifying swing DOL target exists, keeping the
+          trade count low and selectivity high. Winners run to structural swing targets;
+          losses are capped at the structural stop with break-even management cutting
+          risk further once price moves in favour.
         </p>
       </div>
     </div>

@@ -227,9 +227,10 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
         </tbody>
       </table>
       <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
-        NY ICT bot &middot; IBKR paper account DUP551162 &middot; real bid&ndash;ask fills
+        All three bots combined &middot; IBKR paper account DUP551162 &middot; real bid&ndash;ask fills
         &middot; <span id="trades-updated" style="opacity:.7"></span><br />
-        Shows trades from the current version of the bot, live since Oct 15, 2026.
+        P&amp;L is each day&rsquo;s total across the bots; Asia trades count toward the evening the session opened.
+        Shows trades from the current versions of the bots, live since Oct 15, 2026.
       </p>
     </div>
   </div>
@@ -433,18 +434,34 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
     counters.forEach(animateCounter);
   }
 
-  // ── Live trades table ────────────────────────────────────────────────────
-  const TRADES_URL = 'https://raw.githubusercontent.com/stoic474-afk/Trading-portfolio/main/public/trades.json';
+  // ── Live trades table: all three bots merged by day ─────────────────────
+  // Each bot pushes its own monthly file; Asia trades are dated by the evening the session opened.
+  const RAW = 'https://raw.githubusercontent.com/stoic474-afk/Trading-portfolio/main/public/';
+  const SOURCES = [['trades.json', 'NY ICT'], ['trades_scalp.json', 'NY scalp'], ['trades_asia.json', 'Asia']];
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+                  'September', 'October', 'November', 'December'];
+  const NOTE = 'padding:16px 0;text-align:center;font-family:-apple-system,\'Segoe UI\',sans-serif';
 
-  function pillHtml(result) {
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function monthValue(m) {
+    const [name, yr] = String(m || '').split(' ');
+    const i = MONTHS.indexOf(name);
+    return i < 0 ? -1 : parseInt(yr, 10) * 12 + i;
+  }
+
+  function pillHtml(result, bot) {
     const map = { win: 'pill-w', loss: 'pill-l', be: 'pill-be', flat: 'pill-n', mix: 'pill-w' };
     const labels = { win: 'Win', loss: 'Loss', be: 'BE', flat: '11:00 close', mix: 'Win' };
     const cls = map[result] || 'pill-n';
-    const lbl = labels[result] || result;
+    const lbl = labels[result] || esc(result);
+    const title = bot ? ` title="${esc(bot)} bot · ${lbl}"` : '';
     if (result === 'mix') {
       return '<span class="pill pill-w">Win</span> <span class="pill pill-l">Loss</span>';
     }
-    return `<span class="pill ${cls}">${lbl}</span>`;
+    return `<span class="pill ${cls}"${title}>${lbl}</span>`;
   }
 
   function fmtPnl(pnl) {
@@ -459,76 +476,89 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
     return m ? parseInt(m[0]) : 0;
   }
 
-  function renderTrades(data) {
+  function renderTrades(files) {
     const tbody  = document.getElementById('trades-body');
     const heading = document.getElementById('trades-heading');
     const updEl  = document.getElementById('trades-updated');
     if (!tbody) return;
 
-    heading.textContent = 'Live Sessions — ' + data.month;
+    // show the latest month any bot has reached; each bot's file only holds one month
+    const target = Math.max(...files.map(f => monthValue(f.month)));
+    const cur = files.filter(f => monthValue(f.month) === target);
+    const month = cur[0].month;
+    heading.textContent = 'Live Sessions — ' + month;
 
-    // date only: the bot stamps New York time with a 'Z' suffix, so the hour isn't reliable
-    if (data.updated && updEl) {
-      const d = new Date(data.updated);
+    // date only: the main bot stamps New York time with a 'Z' suffix, so the hour isn't reliable
+    const stamps = cur.map(f => new Date(f.updated)).filter(d => !isNaN(d));
+    if (stamps.length && updEl) {
+      const d = new Date(Math.max(...stamps));
       updEl.textContent = 'updated ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
     }
 
-    if (!data.trades.length && !(data.no_setup_days || []).length) {
-      tbody.innerHTML = '<tr><td colspan="3" class="dim" style="padding:16px 0;text-align:center;font-family:-apple-system,\'Segoe UI\',sans-serif">No trades yet on the upgraded bot &mdash; live results will appear here as it trades.</td></tr>';
+    const trades = cur.flatMap(f => f.trades.map(t => ({ ...t, bot: f.bot, pnl: Number(t.pnl) || 0 })));
+    const noSetup = cur.flatMap(f => f.no_setup_days || []);
+    if (!trades.length && !noSetup.length) {
+      tbody.innerHTML = `<tr><td colspan="3" class="dim" style="${NOTE}">No trades yet on the upgraded bots &mdash; live results will appear here as they trade.</td></tr>`;
       return;
     }
 
     const byDate = {};
-    for (const t of data.trades) {
+    for (const t of trades) {
       if (!byDate[t.date]) byDate[t.date] = [];
       byDate[t.date].push(t);
     }
 
     const events = [];
-    for (const [date, trades] of Object.entries(byDate)) {
-      const totalPnl = trades.reduce((s, t) => s + t.pnl, 0);
-      const pills    = trades.map(t => pillHtml(t.result)).join(' ');
-      events.push({ day: dayNum(date), date, type: 'trade', pills, pnl: totalPnl });
+    for (const [date, ts] of Object.entries(byDate)) {
+      const dayPnl = ts.reduce((s, t) => s + t.pnl, 0);
+      const pills  = ts.map(t => pillHtml(t.result, t.bot)).join(' ');
+      events.push({ day: dayNum(date), date, type: 'trade', pills, pnl: dayPnl });
     }
-    for (const ns of (data.no_setup_days || [])) {
-      events.push({ day: dayNum(ns), date: ns, type: 'nosetup' });
+    for (const ns of noSetup) {
+      if (!byDate[ns]) events.push({ day: dayNum(ns), date: ns, type: 'nosetup' });
     }
     events.sort((a, b) => a.day - b.day);
 
     let wins = 0, losses = 0, bes = 0, totalPnl = 0;
-    for (const t of data.trades) {
+    for (const t of trades) {
       if (t.result === 'win' || t.result === 'mix') wins++;
       else if (t.result === 'loss') losses++;
       else if (t.result === 'be') bes++;
       totalPnl += t.pnl;
     }
-    const tradeCount = data.trades.length;
 
     let rows = '';
     for (const ev of events) {
       if (ev.type === 'nosetup') {
-        rows += `<tr><td class="dim">${ev.date}</td><td><span class="pill pill-n">No setup</span></td><td class="dim">&mdash;</td></tr>`;
+        rows += `<tr><td class="dim">${esc(ev.date)}</td><td><span class="pill pill-n">No setup</span></td><td class="dim">&mdash;</td></tr>`;
       } else {
-        rows += `<tr><td>${ev.date}</td><td>${ev.pills}</td><td>${fmtPnl(Math.round(ev.pnl * 100) / 100)}</td></tr>`;
+        rows += `<tr><td>${esc(ev.date)}</td><td>${ev.pills}</td><td>${fmtPnl(Math.round(ev.pnl * 100) / 100)}</td></tr>`;
       }
     }
 
+    totalPnl = Math.round(totalPnl * 100) / 100;
     const totalSign  = totalPnl >= 0 ? '+' : '−';
     const totalCls   = totalPnl >= 0 ? 'pos-t' : 'neg-t';
     const totalAbs   = Math.abs(totalPnl).toLocaleString('en-US', { minimumFractionDigits: totalPnl % 1 !== 0 ? 2 : 0 });
-    const summary    = `${tradeCount} trades · ${wins}W ${losses}L ${bes}BE`;
-    rows += `<tr class="total-row"><td>${data.month.split(' ')[0]} total</td><td class="dim" style="font-size:12px;font-family:-apple-system,'Segoe UI',sans-serif">${summary}</td><td class="${totalCls}">${totalSign}$${totalAbs}</td></tr>`;
+    const summary    = `${trades.length} trade${trades.length === 1 ? '' : 's'} · ${wins}W ${losses}L ${bes}BE`;
+    rows += `<tr class="total-row"><td>${esc(month.split(' ')[0])} total</td><td class="dim" style="font-size:12px;font-family:-apple-system,'Segoe UI',sans-serif">${summary}</td><td class="${totalCls}">${totalSign}$${totalAbs}</td></tr>`;
 
     tbody.innerHTML = rows;
   }
 
-  fetch(TRADES_URL + '?v=' + Date.now())
-    .then(r => r.json())
-    .then(renderTrades)
-    .catch(() => {
-      const tbody = document.getElementById('trades-body');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="dim" style="padding:16px 0;text-align:center">Could not load trade data.</td></tr>';
-    });
+  Promise.all(SOURCES.map(([file, bot]) =>
+    fetch(RAW + file + '?v=' + Date.now())
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => (d && Array.isArray(d.trades) && monthValue(d.month) >= 0 ? { ...d, bot } : null))
+      .catch(() => null)
+  )).then(files => {
+    const ok = files.filter(Boolean);
+    if (!ok.length) throw new Error('no trade files');
+    renderTrades(ok);
+  }).catch(() => {
+    const tbody = document.getElementById('trades-body');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="3" class="dim" style="${NOTE}">Could not load trade data.</td></tr>`;
+  });
 })();
 </script>
 

@@ -97,7 +97,6 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
           <tr><td>Profit factor</td><td>1.86</td></tr>
           <tr><td>Avg win / loss</td><td>+$836 / −$291</td></tr>
           <tr><td>Lowest vs start</td><td class="neg-t">−$288</td></tr>
-          <tr><td>Eval pass rate</td><td>92%</td></tr>
         </table>
       </article>
 
@@ -123,7 +122,6 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
           <tr><td>Profit factor</td><td>1.42</td></tr>
           <tr><td>Avg win / loss</td><td>+$1,080 / −$358</td></tr>
           <tr><td>Lowest vs start</td><td class="neg-t">−$1,440</td></tr>
-          <tr><td>Eval pass rate</td><td>83%</td></tr>
         </table>
       </article>
 
@@ -150,14 +148,10 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
           <tr><td>Profit factor</td><td>2.12</td></tr>
           <tr><td>Avg win / loss</td><td>+$926 / −$240</td></tr>
           <tr><td>Lowest vs start</td><td class="neg-t">−$922</td></tr>
-          <tr><td>Eval pass rate</td><td>96%</td></tr>
         </table>
       </article>
 
     </div>
-    <p class="fine">
-      Eval pass rate: share of start dates that reached +$3,000 before falling $2,000 below the starting balance.
-    </p>
   </section>
 
   <!-- ── COMBINED ── -->
@@ -214,10 +208,6 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
         <p>
           It was checked against the live bot&rsquo;s log: daily bias scores matched exactly on 40 of 46 logged days,
           and many replayed entries matched live entries to the tick on price, stop and target.
-        </p>
-        <p>
-          The rules were chosen on this same year of data, so expect live results to come in
-          <strong>lower than the backtest</strong>.
         </p>
       </div>
     </div>

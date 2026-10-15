@@ -285,7 +285,6 @@ section { margin-bottom: 52px; }
   font-family: ui-monospace, 'Cascadia Code', monospace;
   font-weight: 600;
 }
-.fine { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
 
 /* ── MONTH TABLE ── */
 section .two-col { margin-bottom: 0; }

@@ -1,32 +1,7 @@
 {
   "month": "October 2026",
   "account": "IBKR DUP551162",
-  "updated": "2026-10-07T09:42:10Z",
-  "trades": [
-    {
-      "date": "Oct 5",
-      "result": "be",
-      "pnl": 0.0,
-      "note": ""
-    },
-    {
-      "date": "Oct 5",
-      "result": "loss",
-      "pnl": -222.0,
-      "note": ""
-    },
-    {
-      "date": "Oct 7",
-      "result": "loss",
-      "pnl": -430.0,
-      "note": ""
-    },
-    {
-      "date": "Oct 7",
-      "result": "loss",
-      "pnl": -596.5,
-      "note": ""
-    }
-  ],
-  "no_setup_days": []
+  "trades": [],
+  "no_setup_days": [],
+  "updated": "2026-10-15T21:14:38Z"
 }

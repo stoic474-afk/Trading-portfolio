@@ -229,8 +229,7 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
       <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
         NY ICT bot &middot; IBKR paper account DUP551162 &middot; real bid&ndash;ask fills
         &middot; <span id="trades-updated" style="opacity:.7"></span><br />
-        Live trades before Sep 30, 2026 ran on 10&#8209;minute-delayed market data and aren&rsquo;t representative;
-        real-time since then. The bot was upgraded to the rules above on Oct 15, 2026.
+        Shows trades from the current version of the bot, live since Oct 15, 2026.
       </p>
     </div>
   </div>
@@ -468,6 +467,17 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
 
     heading.textContent = 'Live Sessions — ' + data.month;
 
+    // date only: the bot stamps New York time with a 'Z' suffix, so the hour isn't reliable
+    if (data.updated && updEl) {
+      const d = new Date(data.updated);
+      updEl.textContent = 'updated ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
+    }
+
+    if (!data.trades.length && !(data.no_setup_days || []).length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="dim" style="padding:16px 0;text-align:center;font-family:-apple-system,\'Segoe UI\',sans-serif">No trades yet on the upgraded bot &mdash; live results will appear here as it trades.</td></tr>';
+      return;
+    }
+
     const byDate = {};
     for (const t of data.trades) {
       if (!byDate[t.date]) byDate[t.date] = [];
@@ -510,11 +520,6 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
     rows += `<tr class="total-row"><td>${data.month.split(' ')[0]} total</td><td class="dim" style="font-size:12px;font-family:-apple-system,'Segoe UI',sans-serif">${summary}</td><td class="${totalCls}">${totalSign}$${totalAbs}</td></tr>`;
 
     tbody.innerHTML = rows;
-
-    if (data.updated && updEl) {
-      const d = new Date(data.updated);
-      updEl.textContent = 'updated ' + d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' }) + ' ET';
-    }
   }
 
   fetch(TRADES_URL + '?v=' + Date.now())

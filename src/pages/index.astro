@@ -1,19 +1,29 @@
 ---
 import '../styles/global.css';
+
+// 1-year backtest, Oct 2025 – Sep 2026: [month, NY ICT, NY scalp, Asia] — each bot's live rules, real IBKR data
+const months = [
+  ['Oct 2025', 464, -1080, -922], ['Nov 2025', 2912, 6414, 3840], ['Dec 2025', 4015, 720, 4342],
+  ['Jan 2026', 568, 7200, 1440], ['Feb 2026', 1340, -720, 960], ['Mar 2026', 4676, -1080, -720],
+  ['Apr 2026', -1328, -1800, 2160], ['May 2026', 2258, 720, 720], ['Jun 2026', 1509, 2880, 2640],
+  ['Jul 2026', 1700, 1080, 1920], ['Aug 2026', -1325, 2160, 0], ['Sep 2026', 224, 2160, 240],
+];
+const money = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + '$' + Math.abs(v).toLocaleString('en-US');
+const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
 ---
 
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Matt's Automated Trading Bot</title>
-  <meta name="description" content="Algorithmic trading bot running ICT AMD setups on MNQ futures — live results and engineering overview." />
-  <meta property="og:title" content="Matt's Automated Trading Bot" />
-  <meta property="og:description" content="Algorithmic trading bot running ICT AMD setups on MNQ futures — live results and engineering overview." />
+  <title>Nemesis Protocol</title>
+  <meta name="description" content="Three automated MNQ futures bots on one Interactive Brokers account — NY-open ICT model, opening-range scalper and Asia-session OTE continuation — with live-replica backtests on real data." />
+  <meta property="og:title" content="Nemesis Protocol" />
+  <meta property="og:description" content="Three automated MNQ futures bots on one IBKR account, with live-replica backtests on real data and a live dashboard." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Matt's Automated Trading Bot" />
-  <meta name="twitter:description" content="Algorithmic trading bot running ICT AMD setups on MNQ futures — live results and engineering overview." />
+  <meta name="twitter:title" content="Nemesis Protocol" />
+  <meta name="twitter:description" content="Three automated MNQ futures bots on one IBKR account, with live-replica backtests on real data and a live dashboard." />
 </head>
 <body>
 
@@ -23,9 +33,9 @@ import '../styles/global.css';
     <div class="hero-eyebrow">// project portfolio</div>
     <h1 class="hero-title">Nemesis Protocol</h1>
     <p class="hero-sub">
-      Headless algorithmic trading bot executing ICT AMD setups on Micro
-      E&#8209;mini Nasdaq futures via the Interactive Brokers API.
-      Automated from signal detection through order management to exit.
+      Three automated trading bots on Micro E&#8209;mini Nasdaq futures, running side by side on one
+      Interactive Brokers account &mdash; two at the New York open, one overnight. Signal detection,
+      order management and exits are fully automated.
     </p>
     <div class="badge-row">
       <span class="badge">Python 3.11</span>
@@ -40,48 +50,174 @@ import '../styles/global.css';
 
 <div class="content">
 
-  <!-- ── PERF RIBBON ── -->
-  <div class="perf-ribbon" role="region" aria-label="Performance metrics">
+  <!-- ── PERF RIBBON (combined) ── -->
+  <div class="perf-ribbon" role="region" aria-label="Combined backtest performance">
     <div class="perf-tile">
-      <div class="perf-eyebrow">Backtest Net P&amp;L</div>
-      <div class="perf-num green" data-counter data-prefix="+" data-symbol="$" data-target="23032">+$0</div>
-      <div class="perf-sub">Apr &ndash; Sep 2026 &middot; 64 trades</div>
+      <div class="perf-eyebrow">All 3 bots &middot; backtest net P&amp;L</div>
+      <div class="perf-num green" data-counter data-prefix="+" data-symbol="$" data-target="52288">+$52,288</div>
+      <div class="perf-sub">Oct 2025 &ndash; Sep 2026 &middot; 536 trades &middot; one account</div>
     </div>
     <div class="perf-tile">
-      <div class="perf-eyebrow">Win Rate</div>
-      <div class="perf-num blue" data-counter data-suffix="%" data-decimals="1" data-target="203">0%</div>
-      <div class="perf-sub">13 wins from 64 trades &middot; avg +$1,112</div>
+      <div class="perf-eyebrow">Average month</div>
+      <div class="perf-num blue" data-counter data-prefix="+" data-symbol="$" data-target="4357">+$4,357</div>
+      <div class="perf-sub">10 of 12 months green &middot; +$200 per trading day</div>
     </div>
     <div class="perf-tile">
-      <div class="perf-eyebrow">Max Drawdown</div>
-      <div class="perf-num" data-counter data-prefix="$" data-target="1278">$0</div>
-      <div class="perf-sub">Across entire 6-month backtest period</div>
+      <div class="perf-eyebrow">Lowest point vs start</div>
+      <div class="perf-num" data-counter data-prefix="−" data-symbol="$" data-target="1538">−$1,538</div>
+      <div class="perf-sub">Biggest drop from a high $3,444 &middot; profit factor 1.67</div>
     </div>
   </div>
 
-  <!-- ── OVERVIEW + LIVE ── -->
-  <div class="two-col">
-    <div>
-      <div class="section-label">Overview</div>
+  <!-- ── THE BOTS ── -->
+  <section>
+    <div class="section-label">The Bots</div>
+    <div class="bot-grid">
+
+      <article class="bot-card">
+        <div class="bot-head">
+          <div class="bot-name">NY Open &middot; ICT Model</div>
+          <div class="bot-when">9:30&ndash;11:00 AM ET</div>
+        </div>
+        <p class="bot-desc">
+          Scores fair value gaps on the 4&#8209;hour, 1&#8209;hour, 30&#8209;minute and 15&#8209;minute charts to set a
+          daily bias, then waits for a liquidity sweep of a key level, a displacement candle and an inverting
+          fair value gap before entering at market.
+        </p>
+        <ul class="bot-rules">
+          <li>Skips flat opens: overnight gap under 0.15&times; the 14&#8209;day average range</li>
+          <li>Stop beyond the last ten 1&#8209;minute bars; target at the next swing draw on liquidity</li>
+          <li>Premium/discount filter and MES divergence veto</li>
+          <li>Risk &le; $450 &middot; &le; 8 MNQ &middot; max 2 trades a day</li>
+          <li>Break-even on structure, FVG obstacles or MES divergence; closes anything open at 11:00</li>
+        </ul>
+        <table class="bot-stats">
+          <tr><td>Backtest net</td><td class="pos-t">+$17,014</td></tr>
+          <tr><td>Trades</td><td>172 &middot; 25.6% wins</td></tr>
+          <tr><td>Profit factor</td><td>1.86</td></tr>
+          <tr><td>Avg win / loss</td><td>+$836 / −$291</td></tr>
+          <tr><td>Lowest vs start</td><td class="neg-t">−$288</td></tr>
+          <tr><td>Eval pass rate</td><td>92%</td></tr>
+        </table>
+      </article>
+
+      <article class="bot-card">
+        <div class="bot-head">
+          <div class="bot-name">NY Open &middot; Scalper</div>
+          <div class="bot-when">9:36&ndash;11:30 AM ET</div>
+        </div>
+        <p class="bot-desc">
+          Builds the 9:30&ndash;9:35 opening range; a break of it confirms direction. Entries come from a retest
+          of the range, a VWAP bounce or a hold of a key level, evaluated on completed 1&#8209;minute bars.
+        </p>
+        <ul class="bot-rules">
+          <li>6 MNQ &middot; 30&#8209;point stop &middot; 90&#8209;point target (3R)</li>
+          <li>Stop moves to entry once the trade is +30 points</li>
+          <li>Max 3 trades a day; stops for the day at −$1,500</li>
+          <li>Sits out 5 days if the last 3 trading days lose $1,000+</li>
+          <li>Skips FOMC days and the day before; anything open closes at 4:58 PM</li>
+        </ul>
+        <table class="bot-stats">
+          <tr><td>Backtest net</td><td class="pos-t">+$18,654</td></tr>
+          <tr><td>Trades</td><td>268 &middot; 21.6% wins</td></tr>
+          <tr><td>Profit factor</td><td>1.42</td></tr>
+          <tr><td>Avg win / loss</td><td>+$1,080 / −$358</td></tr>
+          <tr><td>Lowest vs start</td><td class="neg-t">−$1,440</td></tr>
+          <tr><td>Eval pass rate</td><td>83%</td></tr>
+        </table>
+      </article>
+
+      <article class="bot-card">
+        <div class="bot-head">
+          <div class="bot-name">Asia Session &middot; OTE</div>
+          <div class="bot-when">8:00 PM&ndash;2:00 AM ET</div>
+        </div>
+        <p class="bot-desc">
+          Takes the 8:00 PM price as the session anchor and the 6&ndash;8 PM trend as bias. After a displacement of
+          12+ points it waits for a pullback into the 70.5% optimal trade entry zone and a fair value gap
+          inversion in the trend direction.
+        </p>
+        <ul class="bot-rules">
+          <li>15 MNQ &middot; 8&#8209;point stop &middot; 32&#8209;point target (4R)</li>
+          <li>OTE zone 70.5% &plusmn; 5 points</li>
+          <li>One trade per session; no entries 11 PM&ndash;midnight</li>
+          <li>Any open trade is closed at 2:00 AM</li>
+          <li>Trades Sunday evenings too</li>
+        </ul>
+        <table class="bot-stats">
+          <tr><td>Backtest net</td><td class="pos-t">+$16,620</td></tr>
+          <tr><td>Trades</td><td>96 &middot; 35.4% wins</td></tr>
+          <tr><td>Profit factor</td><td>2.12</td></tr>
+          <tr><td>Avg win / loss</td><td>+$926 / −$240</td></tr>
+          <tr><td>Lowest vs start</td><td class="neg-t">−$922</td></tr>
+          <tr><td>Eval pass rate</td><td>96%</td></tr>
+        </table>
+      </article>
+
+    </div>
+    <p class="fine">
+      Eval pass rate: share of start dates that reached +$3,000 before falling $2,000 below the starting balance.
+    </p>
+  </section>
+
+  <!-- ── COMBINED ── -->
+  <section>
+    <div class="section-label">All Three on One Account &mdash; Backtest by Month</div>
+    <div class="two-col">
+      <div class="month-wrap">
+        <table class="live-table month-table">
+          <thead><tr><th>Month</th><th>ICT</th><th>Scalp</th><th>Asia</th><th>All</th></tr></thead>
+          <tbody>
+            {months.map(([m, a, b, c]) => (
+              <tr>
+                <td>{m}</td>
+                <td class={cls(a)}>{money(a)}</td>
+                <td class={cls(b)}>{money(b)}</td>
+                <td class={cls(c)}>{money(c)}</td>
+                <td class={cls(a + b + c)}>{money(a + b + c)}</td>
+              </tr>
+            ))}
+            <tr class="total-row">
+              <td>Year</td><td class="pos-t">+$17,014</td><td class="pos-t">+$18,654</td><td class="pos-t">+$16,620</td><td class="pos-t">+$52,288</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="overview">
         <p>
-          Nemesis Protocol monitors MNQ futures during the <strong>9:30&ndash;11:00&nbsp;AM&nbsp;ET</strong>
-          session window. It identifies swing structure highs and lows as draw-on-liquidity
-          targets, then waits for a manipulation sweep of one level before the
-          distribution phase drives price toward the opposing swing extreme.
+          The bots&rsquo; daily results are close to <strong>uncorrelated</strong>: each one has two or three red
+          months, but they rarely lose in the same month, so only October 2025 and April 2026 were red combined.
         </p>
         <p>
-          Entries require multi-timeframe confluence: a <strong>4-hour, 1-hour, 30-minute, and 15-minute
-          structural bias</strong>, a market structure break, and a fair
-          value gap as the trigger zone. Every entry immediately places an OCA bracket
-          (stop + target) anchored to the <em>actual fill price</em> &mdash; not the
-          intended entry &mdash; to correctly account for slippage.
+          About half of trading days are green, but the average green day (<strong>+$1,034</strong>) is more than
+          twice the average red day (<strong>−$474</strong>). Best day +$5,988, worst day −$1,503.
         </p>
         <p>
-          The bot skips setups where no qualifying swing DOL target exists, keeping the
-          trade count low and selectivity high. Winners run to structural swing targets;
-          losses are capped at the structural stop with break-even management cutting
-          risk further once price moves in favour.
+          The biggest drop from a high was <strong>$3,444</strong> (late January to Feb 6, 2026), recovered a week
+          later. Up to 14 MNQ can be open at once in the morning; commissions (about $4,600 a year) are not
+          included in these figures.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW THE BACKTESTS WORK + LIVE ── -->
+  <div class="two-col">
+    <div>
+      <div class="section-label">How the Backtests Work</div>
+      <div class="overview">
+        <p>
+          Each backtest is a <strong>replay of the live bot</strong>: it loads the bot&rsquo;s own decision code
+          and steps through a year of real IBKR front-month 1&#8209;minute data one minute at a time, rebuilding
+          partly formed candles so it only ever sees what the bot could have seen. No look-ahead.
+        </p>
+        <p>
+          It was checked against the live bot&rsquo;s log: daily bias scores matched exactly on 40 of 46 logged days,
+          and many replayed entries matched live entries to the tick on price, stop and target.
+        </p>
+        <p>
+          The rules were chosen on this same year of data, so expect live results to come in
+          <strong>lower than the backtest</strong>.
         </p>
       </div>
     </div>
@@ -101,61 +237,63 @@ import '../styles/global.css';
         </tbody>
       </table>
       <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
-        Paper account (IBKR DUP551162) &middot; live market data &middot; real bid&ndash;ask spreads
-        &middot; <span id="trades-updated" style="opacity:.7"></span>
+        NY ICT bot &middot; IBKR paper account DUP551162 &middot; real bid&ndash;ask fills
+        &middot; <span id="trades-updated" style="opacity:.7"></span><br />
+        Live trades before Sep 30, 2026 ran on 10&#8209;minute-delayed market data and aren&rsquo;t representative;
+        real-time since then. The bot was upgraded to the rules above on Oct 15, 2026.
       </p>
     </div>
   </div>
 
-  <!-- ── TRADING FLOW ── -->
+  <!-- ── TRADING FLOW (NY ICT) ── -->
   <section>
-    <div class="section-label">How It Works</div>
+    <div class="section-label">How the NY ICT Bot Trades</div>
     <div class="flow-steps" role="list">
       <div class="flow-step" role="listitem">
         <div class="flow-box">
           <span class="step-num">01</span>
           <span class="step-name">HTF Bias</span>
-          <span class="step-detail">4-hr / 1-hr / 30-min / 15-min structural shift &amp; FVG</span>
+          <span class="step-detail">4h / 1h / 30m / 15m FVGs respected vs disrespected</span>
         </div>
       </div>
       <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
       <div class="flow-step" role="listitem">
         <div class="flow-box">
           <span class="step-num">02</span>
-          <span class="step-name">Liquidity Sweep</span>
-          <span class="step-detail">FVG zone swept; price returns through key level</span>
+          <span class="step-name">Gap Check</span>
+          <span class="step-detail">Sit out flat opens and 2%+ gaps</span>
         </div>
       </div>
       <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
       <div class="flow-step" role="listitem">
         <div class="flow-box">
           <span class="step-num">03</span>
-          <span class="step-name">Entry Signal</span>
-          <span class="step-detail">MSB + FVG confluence</span>
+          <span class="step-name">Sweep + Displacement</span>
+          <span class="step-detail">Key level swept, strong candle away</span>
         </div>
       </div>
       <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
       <div class="flow-step" role="listitem">
         <div class="flow-box">
           <span class="step-num">04</span>
-          <span class="step-name">OCA Bracket</span>
-          <span class="step-detail">Stop + target anchored to actual fill</span>
+          <span class="step-name">FVG Inversion</span>
+          <span class="step-detail">5 / 3 / 2 / 1-min entry trigger</span>
         </div>
       </div>
       <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
       <div class="flow-step" role="listitem">
         <div class="flow-box">
           <span class="step-num">05</span>
-          <span class="step-name">BE Management</span>
-          <span class="step-detail">SMT divergence / LH-HL / FVG obstacle</span>
+          <span class="step-name">Fill-Anchored Bracket</span>
+          <span class="step-detail">Stop + target placed at the actual fill</span>
         </div>
       </div>
       <div class="flow-arrow" aria-hidden="true">&rsaquo;</div>
       <div class="flow-step" role="listitem">
         <div class="flow-box">
           <span class="step-num">06</span>
-          <span class="step-name">Exit</span>
-          <span class="step-detail">Target / BE stop / 4&nbsp;pm force-flat</span>
+          <span class="step-name">Manage &amp; Exit</span>
+          <span class="step-detail">Break-even rules &middot; target &middot; 11:00 close</span>
         </div>
       </div>
     </div>
@@ -163,7 +301,7 @@ import '../styles/global.css';
 
   <!-- ── CODE ── -->
   <section>
-    <div class="section-label">Code Highlight &mdash; Fill Callback</div>
+    <div class="section-label">Code Highlight &mdash; Three Bots, One Account</div>
     <div class="code-wrap">
       <div class="code-header">
         <div class="code-dots">
@@ -173,33 +311,20 @@ import '../styles/global.css';
         </div>
         <span class="code-filename">main_trading_bot.py</span>
       </div>
-      <pre class="code-block" role="region" aria-label="Python code snippet" tabindex="0"><span class="ln"></span><span class="cm"># Fires on every partial + complete fill of the entry market order.</span>
-<span class="ln"></span><span class="cm"># Bracket is placed AFTER the fill so stop/target are anchored to</span>
-<span class="ln"></span><span class="cm"># the actual execution price — not the intended entry — accounting</span>
-<span class="ln"></span><span class="cm"># for slippage on each individual leg.</span>
+      <pre class="code-block" role="region" aria-label="Python code snippet" tabindex="0"><span class="ln"></span><span class="kw">def</span> <span class="fn">own_position</span>(ib: <span class="bi">IB</span>, contract) <span class="op">-&gt;</span> <span class="bi">int</span>:
+<span class="ln"></span>    <span class="st">"""This bot's net MNQ position from its own fills today.</span>
+<span class="ln"></span><span class="st">    ib.positions() is the whole account's net position, which</span>
+<span class="ln"></span><span class="st">    includes the scalp and Asia bots' contracts."""</span>
+<span class="ln"></span>    today <span class="op">=</span> datetime.now(ET).date()
+<span class="ln"></span>    pos <span class="op">=</span> <span class="nm">0.0</span>
+<span class="ln"></span>    <span class="kw">for</span> f <span class="kw">in</span> ib.fills():
+<span class="ln"></span>        <span class="kw">if</span> (f.execution.clientId <span class="op">==</span> CLIENT_ID <span class="kw">and</span> f.contract.conId <span class="op">==</span> contract.conId
+<span class="ln"></span>                <span class="kw">and</span> f.time.astimezone(ET).date() <span class="op">==</span> today):
+<span class="ln"></span>            pos <span class="op">+=</span> f.execution.shares <span class="kw">if</span> f.execution.side <span class="op">==</span> <span class="st">"BOT"</span> <span class="kw">else</span> <span class="op">-</span>f.execution.shares
+<span class="ln"></span>    <span class="kw">return</span> <span class="bi">int</span>(<span class="bi">round</span>(pos))
 <span class="ln"></span>
-<span class="ln"></span><span class="dec">@ib.fillEvent</span>
-<span class="ln"></span><span class="kw">def</span> <span class="fn">on_fill</span>(trade: <span class="bi">Trade</span>, fill: <span class="bi">Fill</span>):
-<span class="ln"></span>    <span class="kw">if</span> trade.orderStatus.filled <span class="op">&lt;</span> trade.order.totalQuantity:
-<span class="ln"></span>        <span class="kw">return</span>  <span class="cm"># wait for the complete fill before placing bracket</span>
-<span class="ln"></span>
-<span class="ln"></span>    actual_fill <span class="op">=</span> trade.orderStatus.avgFillPrice
-<span class="ln"></span>    slippage    <span class="op">=</span> actual_fill <span class="op">-</span> state.entry_price
-<span class="ln"></span>
-<span class="ln"></span>    <span class="kw">if</span> state.active_dir <span class="op">==</span> <span class="st">"long"</span>:
-<span class="ln"></span>        stop   <span class="op">=</span> <span class="bi">round</span>(actual_fill <span class="op">-</span> state.risk_pts,      <span class="nm">2</span>)
-<span class="ln"></span>        target <span class="op">=</span> <span class="bi">round</span>(actual_fill <span class="op">+</span> state.target_offset, <span class="nm">2</span>)
-<span class="ln"></span>    <span class="kw">else</span>:
-<span class="ln"></span>        stop   <span class="op">=</span> <span class="bi">round</span>(actual_fill <span class="op">+</span> state.risk_pts,      <span class="nm">2</span>)
-<span class="ln"></span>        target <span class="op">=</span> <span class="bi">round</span>(actual_fill <span class="op">-</span> state.target_offset, <span class="nm">2</span>)
-<span class="ln"></span>
-<span class="ln"></span>    log.info(
-<span class="ln"></span>        <span class="st">f"[FILL] <span class="op">{</span>state.active_dir.upper()<span class="op">}</span> x<span class="op">{</span>state.contracts<span class="op">}</span> @ <span class="op">{</span>actual_fill:.2f<span class="op">}</span>"</span>
-<span class="ln"></span>        <span class="st">f"  slippage <span class="op">{</span>slippage:+.2f<span class="op">}</span> pts | stop <span class="op">{</span>stop:.2f<span class="op">}</span> | target <span class="op">{</span>target:.2f<span class="op">}</span>"</span>
-<span class="ln"></span>    )
-<span class="ln"></span>
-<span class="ln"></span>    <span class="cm"># OCA group: when one order fills, the other is automatically cancelled</span>
-<span class="ln"></span>    place_oca_bracket(ib, contract, state, stop, target)</pre>
+<span class="ln"></span><span class="cm"># The 11:00 force-close and the end-of-day cleanup cancel only orders tagged</span>
+<span class="ln"></span><span class="cm"># with this bot's clientId and close only this position — never the account total.</span></pre>
     </div>
   </section>
 
@@ -209,33 +334,43 @@ import '../styles/global.css';
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">01</div>
-        <div class="feature-title">Async event-driven architecture</div>
-        <div class="feature-desc">Built on ib_insync&rsquo;s asyncio event loop. Fill callbacks, order status updates, and portfolio events are handled asynchronously &mdash; the main loop never blocks waiting for IBKR responses.</div>
+        <div class="feature-title">Live-replica backtesting</div>
+        <div class="feature-desc">The backtester runs the live bot&rsquo;s own decision functions over real data, minute by minute, with partly formed higher-timeframe candles &mdash; so a backtest result is what the bot itself would have done, with no look-ahead.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">02</div>
-        <div class="feature-title">OCA bracket order management</div>
-        <div class="feature-desc">Every entry places a One-Cancels-All bracket (stop + limit target). Break-even management re-builds the OCA group with explicit cancellation of both legs to prevent orphaned resting orders.</div>
+        <div class="feature-title">Real-time data watchdog</div>
+        <div class="feature-desc">Every two minutes each bot measures how old IBKR&rsquo;s newest bar is and watches for subscription errors. If the feed falls back to delayed data it sends a Discord alert and flags it on the dashboard.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">03</div>
-        <div class="feature-title">SMT divergence detection</div>
-        <div class="feature-desc">Compares real-time MES and MNQ 1-minute bars to detect Smart Money Technique divergences &mdash; when MES breaks a session extreme that MNQ hasn&rsquo;t, the stop is automatically moved to break-even.</div>
+        <div class="feature-title">Streaming bars at the open</div>
+        <div class="feature-desc">The NY bot opens live-updating bar subscriptions before 9:30 instead of polling IBKR&rsquo;s historical service, which lags 1&ndash;5 minutes at the open. If a stream stalls it falls back to normal requests automatically.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">04</div>
-        <div class="feature-title">Dynamic position sizing</div>
-        <div class="feature-desc">Contracts are calculated per-trade to risk approximately $300 regardless of stop distance. Max 8 contracts enforced. Sizing anchors to actual structural levels, not fixed point distances.</div>
+        <div class="feature-title">Three bots, one account</div>
+        <div class="feature-desc">IBKR nets every bot into one MNQ position, so each bot connects with its own client ID and manages only its own orders. The NY ICT bot&rsquo;s 11:00 close cancels only orders it placed and closes only the contracts its own fills add up to &mdash; never another bot&rsquo;s trade.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">05</div>
-        <div class="feature-title">After-hours order handling</div>
-        <div class="feature-desc">Force-flat at 4:00&nbsp;pm ET via GTC + outsideRth market orders, designed to fill during the GLOBEX session open at 6:00&nbsp;pm when the daily halt ends. Survives the 5&ndash;6&nbsp;pm CME halt window.</div>
+        <div class="feature-title">Fill-anchored brackets</div>
+        <div class="feature-desc">Stops and targets are placed after the entry fills, anchored to the actual fill price, as a One-Cancels-All pair &mdash; so slippage never turns the stop into a bigger loss than planned.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">06</div>
+        <div class="feature-title">Break-even management</div>
+        <div class="feature-desc">The NY ICT bot moves its stop to entry on a structural lower high / higher low, a 5-minute FVG in the trade&rsquo;s path, or an MES/MNQ divergence at a session extreme. The scalper does it at +30 points.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">07</div>
+        <div class="feature-title">Live dashboard</div>
+        <div class="feature-desc">A local dashboard shows each bot&rsquo;s state, positions, live open P&amp;L, distance to stop and target, data-feed status, and a combined view of the whole account.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">08</div>
         <div class="feature-title">Stuck-order recovery</div>
-        <div class="feature-desc">If the bracket target stays in PendingSubmit for &gt;2 minutes &mdash; indicating a silent IBKR rejection &mdash; the bot detects the stall and automatically re-places the full OCA bracket.</div>
+        <div class="feature-desc">After a break-even move, if the new target sits in PendingSubmit for over two minutes &mdash; a silent IBKR rejection &mdash; the bot detects the stall and re-places the full bracket.</div>
       </div>
     </div>
   </section>
@@ -247,18 +382,22 @@ import '../styles/global.css';
       <span class="stack-item">Python 3.11</span>
       <span class="stack-item">ib_insync 0.9.x</span>
       <span class="stack-item">pandas</span>
-      <span class="stack-item">pytz / zoneinfo</span>
+      <span class="stack-item">numpy</span>
+      <span class="stack-item">pytz</span>
       <span class="stack-item">asyncio</span>
       <span class="stack-item">requests</span>
       <span class="stack-item">Interactive Brokers TWS API</span>
       <span class="stack-item">Discord Webhooks</span>
-      <span class="stack-item">Windows Task Scheduler</span>
+      <span class="stack-item">Astro</span>
     </div>
   </section>
 
   <!-- ── FOOTER ── -->
   <footer class="doc-footer">
-    All trading results are from a simulated paper account (IBKR DUP551162) using live market data and real bid&ndash;ask spreads; no real capital was at risk. Backtest performance (Apr&ndash;Sep 2026) uses historical 1-minute MNQ data with realistic fill assumptions. Past performance does not guarantee future results.
+    All live results are from a simulated paper account (IBKR DUP551162); no real capital was at risk.
+    Backtests cover Oct 1, 2025 &ndash; Sep 30, 2026 on real IBKR front-month 1&#8209;minute MNQ data, replaying each
+    bot&rsquo;s live rules; they exclude commissions, and the rules were chosen on the same period, so live
+    results should be expected to be lower. Past performance does not guarantee future results.
   </footer>
 
 </div>
@@ -309,8 +448,8 @@ import '../styles/global.css';
   const TRADES_URL = 'https://raw.githubusercontent.com/stoic474-afk/Trading-portfolio/main/public/trades.json';
 
   function pillHtml(result) {
-    const map = { win: 'pill-w', loss: 'pill-l', be: 'pill-be', mix: 'pill-w' };
-    const labels = { win: 'Win', loss: 'Loss', be: 'BE', mix: 'Win' };
+    const map = { win: 'pill-w', loss: 'pill-l', be: 'pill-be', flat: 'pill-n', mix: 'pill-w' };
+    const labels = { win: 'Win', loss: 'Loss', be: 'BE', flat: '11:00 close', mix: 'Win' };
     const cls = map[result] || 'pill-n';
     const lbl = labels[result] || result;
     if (result === 'mix') {
@@ -339,14 +478,12 @@ import '../styles/global.css';
 
     heading.textContent = 'Live Sessions — ' + data.month;
 
-    // Group trades by date
     const byDate = {};
     for (const t of data.trades) {
       if (!byDate[t.date]) byDate[t.date] = [];
       byDate[t.date].push(t);
     }
 
-    // Build sorted list of all events (trades + no-setup days)
     const events = [];
     for (const [date, trades] of Object.entries(byDate)) {
       const totalPnl = trades.reduce((s, t) => s + t.pnl, 0);
@@ -358,7 +495,6 @@ import '../styles/global.css';
     }
     events.sort((a, b) => a.day - b.day);
 
-    // Totals
     let wins = 0, losses = 0, bes = 0, totalPnl = 0;
     for (const t of data.trades) {
       if (t.result === 'win' || t.result === 'mix') wins++;
@@ -387,7 +523,7 @@ import '../styles/global.css';
 
     if (data.updated && updEl) {
       const d = new Date(data.updated);
-      updEl.textContent = 'updated ' + d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) + ' ET';
+      updEl.textContent = 'updated ' + d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' }) + ' ET';
     }
   }
 

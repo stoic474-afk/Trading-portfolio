@@ -1,85 +1,32 @@
 {
-  "month": "August 2026",
+  "month": "October 2026",
   "account": "IBKR DUP551162",
-  "updated": "2026-08-25T15:49:00Z",
+  "updated": "2026-10-07T09:42:10Z",
   "trades": [
     {
-      "date": "Aug 3",
+      "date": "Oct 5",
+      "result": "be",
+      "pnl": 0.0,
+      "note": ""
+    },
+    {
+      "date": "Oct 5",
       "result": "loss",
-      "pnl": -236,
+      "pnl": -222.0,
       "note": ""
     },
     {
-      "date": "Aug 6",
-      "result": "win",
-      "pnl": 423,
-      "note": ""
-    },
-    {
-      "date": "Aug 7",
-      "result": "mix",
-      "pnl": 140,
-      "note": "W+L"
-    },
-    {
-      "date": "Aug 11",
-      "result": "be",
-      "pnl": 0,
-      "note": ""
-    },
-    {
-      "date": "Aug 12",
-      "result": "win",
-      "pnl": 232,
-      "note": ""
-    },
-    {
-      "date": "Aug 14",
-      "result": "win",
-      "pnl": 723.5,
-      "note": "Short 30242→30062"
-    },
-    {
-      "date": "Aug 17",
-      "result": "be",
-      "pnl": -57.0,
-      "note": ""
-    },
-    {
-      "date": "Aug 17",
-      "result": "be",
-      "pnl": -60.0,
-      "note": ""
-    },
-    {
-      "date": "Aug 18",
+      "date": "Oct 7",
       "result": "loss",
-      "pnl": -234.0,
+      "pnl": -430.0,
       "note": ""
     },
     {
-      "date": "Aug 18",
-      "result": "be",
-      "pnl": -4.0,
-      "note": ""
-    },
-    {
-      "date": "Aug 19",
-      "result": "win",
-      "pnl": 272.84,
-      "note": "4pm flat"
-    },
-    {
-      "date": "Aug 25",
-      "result": "be",
-      "pnl": 0,
+      "date": "Oct 7",
+      "result": "loss",
+      "pnl": -596.5,
       "note": ""
     }
   ],
-  "no_setup_days": [
-    "Aug 4–5",
-    "Aug 10",
-    "Aug 13",
-    "Aug 15"
-  ]
+  "no_setup_days": []
 }

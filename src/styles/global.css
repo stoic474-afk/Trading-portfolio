@@ -242,6 +242,60 @@ section { margin-bottom: 52px; }
 .neg-t { color: #DC2626; }
 .dim   { color: var(--muted); }
 
+/* ── BOT CARDS ── */
+.bot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.bot-card { background: var(--surface); padding: 20px 20px 18px; display: flex; flex-direction: column; }
+.bot-head { margin-bottom: 12px; }
+.bot-name { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+.bot-when {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  margin-top: 3px;
+}
+.bot-desc { font-size: 12.5px; color: var(--muted); line-height: 1.65; margin-bottom: 12px; }
+.bot-rules {
+  list-style: none;
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  display: grid;
+  gap: 6px;
+}
+.bot-rules li { padding-left: 12px; position: relative; }
+.bot-rules li::before { content: '›'; position: absolute; left: 0; color: var(--accent); }
+.bot-stats {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: auto;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.bot-stats td { padding: 6px 0; border-top: 1px solid var(--hairline); }
+.bot-stats td:first-child { color: var(--muted); }
+.bot-stats td:last-child {
+  text-align: right;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-weight: 600;
+}
+.fine { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+
+/* ── MONTH TABLE ── */
+section .two-col { margin-bottom: 0; }
+.month-wrap { overflow-x: auto; }
+.month-table th:not(:first-child),
+.month-table td:not(:first-child) { text-align: right; }
+.month-table td:last-child { font-weight: 600; }
+.month-table td, .month-table th { padding-left: 10px; }
+.month-table td:first-child, .month-table th:first-child { padding-left: 0; white-space: nowrap; }
+
 /* ── FLOW DIAGRAM ── */
 .flow-steps {
   display: flex;
@@ -372,6 +426,9 @@ section { margin-bottom: 52px; }
 }
 
 /* ── RESPONSIVE ── */
+@media (max-width: 780px) {
+  .bot-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 640px) {
   .hero { padding: 44px 20px 40px; }
   .content { padding: 0 18px 52px; }

@@ -227,10 +227,12 @@ const cls = (v) => (v > 0 ? 'pos-t' : v < 0 ? 'neg-t' : 'dim');
         </tbody>
       </table>
       <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
-        All three bots combined &middot; IBKR paper account DUP551162 &middot; real bid&ndash;ask fills
+        All three bots combined &middot; IBKR paper account DUP551162 &middot; P&amp;L at real market prices
         &middot; <span id="trades-updated" style="opacity:.7"></span><br />
-        P&amp;L is each day&rsquo;s total across the bots; Asia trades count toward the evening the session opened.
-        Shows trades from the current versions of the bots, live since Oct 15, 2026.
+        P&amp;L is each day&rsquo;s total across the bots, priced at the real market price at entry and exit
+        (each order&rsquo;s first fill). IBKR&rsquo;s paper simulator fills the part of a larger order beyond the
+        best price about 0.1% away; that simulated cost is left out. Asia trades count toward the evening the
+        session opened. Shows trades from the current versions of the bots, live since Oct 15, 2026.
       </p>
     </div>
   </div>

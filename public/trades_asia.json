@@ -5,8 +5,9 @@
     {
       "date": "Oct 15",
       "result": "loss",
-      "pnl": -1428.5,
-      "note": ""
+      "pnl": -60.0,
+      "note": "",
+      "pnl_paper": -1428.5
     }
   ],
   "no_setup_days": [],

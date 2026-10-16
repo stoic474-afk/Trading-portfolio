@@ -1,7 +1,15 @@
 {
   "month": "October 2026",
   "account": "IBKR DUP551162",
-  "trades": [],
+  "trades": [
+    {
+      "date": "Oct 16",
+      "result": "be",
+      "pnl": 3.0,
+      "note": "",
+      "pnl_paper": -56.5
+    }
+  ],
   "no_setup_days": [],
-  "updated": "2026-10-15T21:14:38Z"
+  "updated": "2026-10-16T14:53:43Z"
 }

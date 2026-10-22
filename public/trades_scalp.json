@@ -8,8 +8,15 @@
       "pnl": -354.0,
       "note": "",
       "pnl_paper": -589.5
+    },
+    {
+      "date": "Oct 22",
+      "result": "be",
+      "pnl": -6.0,
+      "note": "",
+      "pnl_paper": -530.5
     }
   ],
   "no_setup_days": [],
-  "updated": "2026-10-20T13:52:32Z"
+  "updated": "2026-10-22T14:16:17Z"
 }

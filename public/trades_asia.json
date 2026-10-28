@@ -1,6 +1,6 @@
 {
   "month": "October 2026",
-  "account": "IBKR DUP551162",
+  "account": "Lucid LFE05096670580001",
   "trades": [
     {
       "date": "Oct 15",
@@ -15,8 +15,15 @@
       "pnl": 960.0,
       "note": "",
       "pnl_paper": 127.0
+    },
+    {
+      "date": "Oct 26",
+      "result": "loss",
+      "pnl": -320.0,
+      "note": "",
+      "pnl_paper": -324.0
     }
   ],
   "no_setup_days": [],
-  "updated": "2026-10-22T01:54:25Z"
+  "updated": "2026-10-28T23:12:58Z"
 }

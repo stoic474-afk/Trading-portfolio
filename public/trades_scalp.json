@@ -1,6 +1,6 @@
 {
   "month": "October 2026",
-  "account": "IBKR DUP551162",
+  "account": "Lucid LFE05096670580001",
   "trades": [
     {
       "date": "Oct 20",
@@ -22,8 +22,43 @@
       "pnl": 1080.0,
       "note": "",
       "pnl_paper": 1080.0
+    },
+    {
+      "date": "Oct 26",
+      "result": "loss",
+      "pnl": -360.0,
+      "note": "",
+      "pnl_paper": -360.0
+    },
+    {
+      "date": "Oct 26",
+      "result": "loss",
+      "pnl": -363.0,
+      "note": "",
+      "pnl_paper": -363.0
+    },
+    {
+      "date": "Oct 28",
+      "result": "win",
+      "pnl": 1080.0,
+      "note": "",
+      "pnl_paper": 1080.0
+    },
+    {
+      "date": "Oct 28",
+      "result": "be",
+      "pnl": 0.0,
+      "note": "",
+      "pnl_paper": 0.0
+    },
+    {
+      "date": "Oct 28",
+      "result": "loss",
+      "pnl": -369.0,
+      "note": "",
+      "pnl_paper": -369.0
     }
   ],
   "no_setup_days": [],
-  "updated": "2026-10-22T14:28:29Z"
+  "updated": "2026-10-28T23:12:58Z"
 }

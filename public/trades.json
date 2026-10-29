@@ -1,6 +1,6 @@
 {
   "month": "October 2026",
-  "account": "IBKR DUP551162",
+  "account": "NinjaTrader Sim101",
   "trades": [
     {
       "date": "Oct 16",
@@ -8,8 +8,15 @@
       "pnl": 3.0,
       "note": "",
       "pnl_paper": -56.5
+    },
+    {
+      "date": "Oct 29",
+      "result": "be",
+      "pnl": 0.0,
+      "note": "",
+      "pnl_paper": 0.0
     }
   ],
   "no_setup_days": [],
-  "updated": "2026-10-19T16:47:36Z"
+  "updated": "2026-10-29T13:47:36Z"
 }

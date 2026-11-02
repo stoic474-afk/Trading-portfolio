@@ -1,22 +1,15 @@
 {
-  "month": "October 2026",
+  "month": "November 2026",
   "account": "NinjaTrader Sim101",
   "trades": [
     {
-      "date": "Oct 16",
-      "result": "be",
-      "pnl": 3.0,
+      "date": "Nov 2",
+      "result": "flat",
+      "pnl": 645.0,
       "note": "",
-      "pnl_paper": -56.5
-    },
-    {
-      "date": "Oct 29",
-      "result": "be",
-      "pnl": 0.0,
-      "note": "",
-      "pnl_paper": 0.0
+      "pnl_paper": 643.5
     }
   ],
   "no_setup_days": [],
-  "updated": "2026-10-29T13:47:36Z"
+  "updated": "2026-11-02T16:00:07Z"
 }

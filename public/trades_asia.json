@@ -1,29 +1,15 @@
 {
-  "month": "October 2026",
+  "month": "November 2026",
   "account": "Lucid LFE05096670580001",
   "trades": [
     {
-      "date": "Oct 15",
-      "result": "loss",
-      "pnl": -60.0,
-      "note": "",
-      "pnl_paper": -1428.5
-    },
-    {
-      "date": "Oct 21",
-      "result": "win",
-      "pnl": 960.0,
-      "note": "",
-      "pnl_paper": 127.0
-    },
-    {
-      "date": "Oct 26",
+      "date": "Nov 2",
       "result": "loss",
       "pnl": -320.0,
       "note": "",
-      "pnl_paper": -324.0
+      "pnl_paper": -339.5
     }
   ],
   "no_setup_days": [],
-  "updated": "2026-10-28T23:12:58Z"
+  "updated": "2026-11-03T03:38:02Z"
 }

@@ -22,8 +22,15 @@
       "pnl": -330.0,
       "note": "",
       "pnl_paper": -330.0
+    },
+    {
+      "date": "Nov 16",
+      "result": "loss",
+      "pnl": -320.0,
+      "note": "",
+      "pnl_paper": -346.0
     }
   ],
   "no_setup_days": [],
-  "updated": "2026-11-12T03:40:02Z"
+  "updated": "2026-11-17T05:55:42Z"
 }
